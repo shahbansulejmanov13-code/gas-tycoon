@@ -77,18 +77,16 @@ body{margin:0;background:#010205;color:#fff;font-family:sans-serif;overflow:hidd
         let shadowGrad = ctx.createLinearGradient(x - r, y - r, x + r, y + r); shadowGrad.addColorStop(0, 'rgba(255,255,255,0.1)'); shadowGrad.addColorStop(0.5, 'rgba(0,0,0,0.4)'); shadowGrad.addColorStop(1, 'rgba(0,0,0,0.95)');
         ctx.fillStyle = shadowGrad; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); ctx.restore();
 
-        // 🛰️ РИСУЕМ СПУТНИК НА ОРБИТЕ ПЛАНЕТЫ
         let satX = x + Math.cos(satelliteAngle) * (r * 1.4); let satY = y + Math.sin(satelliteAngle) * (r * 0.6);
         ctx.save(); ctx.fillStyle = "#cbd5e1"; ctx.shadowBlur = 10; ctx.shadowColor = "#ffffff";
-        ctx.beginPath(); ctx.領 = ctx.arc(satX, satY, 5, 0, Math.PI*2); ctx.fill(); // Корпус
-        ctx.fillStyle = "#38bdf8"; ctx.fillRect(satX - 15, satY - 2, 8, 4); ctx.fillRect(satX + 7, satY - 2, 8, 4); // Батареи
+        ctx.beginPath(); ctx.arc(satX, satY, 5, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#38bdf8"; ctx.fillRect(satX - 15, satY - 2, 8, 4); ctx.fillRect(satX + 7, satY - 2, 8, 4);
         ctx.restore();
     }
 
     function draw() {
         let b = biomes[currentBiomeIdx];
         ctx.fillStyle = '#020308'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
         ctx.fillStyle = "#ffffff";
         for(let i=0; i<stars.length; i++) {
             let s = stars[i]; s.alpha += (Math.random() - 0.5) * 0.02; s.alpha = Math.max(0.2, Math.min(1, s.alpha));
@@ -96,14 +94,13 @@ body{margin:0;background:#010205;color:#fff;font-family:sans-serif;overflow:hidd
         }
         ctx.globalAlpha = 1;
 
-        // ☄️ ЛОГИКА МЕТЕОРИТОВ
         if(!meteor.active && Math.random() < 0.005) {
             meteor.x = Math.random() * canvas.width; meteor.y = -50;
             meteor.vx = (Math.random() - 0.3) * 10 + 5; meteor.vy = Math.random() * 8 + 6; meteor.active = true;
         }
         if(meteor.active) {
             meteor.x += meteor.vx; meteor.y += meteor.vy;
-            let mGrad = ctx.createLinearGradient(meteor.x, meteor.meteorY, meteor.x - meteor.vx*4, meteor.y - meteor.vy*4);
+            let mGrad = ctx.createLinearGradient(meteor.x, meteor.y, meteor.x - meteor.vx*4, meteor.y - meteor.vy*4);
             mGrad.addColorStop(0, '#ffffff'); mGrad.addColorStop(0.2, b.neon); mGrad.addColorStop(1, 'transparent');
             ctx.strokeStyle = mGrad; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(meteor.x, meteor.y); ctx.lineTo(meteor.x - meteor.vx*4, meteor.y - meteor.vy*4); ctx.stroke();
             if(meteor.y > canvas.height + 50 || meteor.x > canvas.width + 50) meteor.active = false;
@@ -111,18 +108,16 @@ body{margin:0;background:#010205;color:#fff;font-family:sans-serif;overflow:hidd
 
         let planetSize = Math.min(canvas.width, canvas.height) * 0.22; drawPlanet(canvas.width * 0.25, canvas.height * 0.35, planetSize);
 
-        // Газовые частицы
         for(let i = particles.length - 1; i >= 0; i--) {
             let p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.alpha -= 0.02;
             if(p.alpha <= 0) { particles.splice(i, 1); continue; }
             ctx.save(); ctx.globalAlpha = p.alpha; ctx.shadowBlur = 8; ctx.shadowColor = p.color; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.restore();
         }
 
-        // 💥 ВЫЛЕТАЮЩИЕ ЦИФРЫ ТЕКСТА КЛИКА
         for(let i = texts.length - 1; i >= 0; i--) {
             let t = texts[i]; t.y += t.vy; t.alpha -= 0.02;
             if(t.alpha <= 0) { texts.splice(i, 1); continue; }
-            ctx.save(); ctx.globalAlpha = t.alpha; ctx.font = "black 18px sans-serif"; ctx.fillStyle = t.color; ctx.shadowBlur = 5; ctx.shadowColor = t.color;
+            ctx.save(); ctx.globalAlpha = t.alpha; ctx.font = "bold 18px sans-serif"; ctx.fillStyle = t.color; ctx.shadowBlur = 5; ctx.shadowColor = t.color;
             ctx.fillText(t.text, t.x - 15, t.y); ctx.restore();
         }
 
