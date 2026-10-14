@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Gas Tycoon: Biomes</title><script src="https://yandex.ru"></script><style>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Gas Tycoon: Biomes Evolution</title><script src="https://yandex.ru"></script><style>
 body{margin:0;background:#03050d;color:#fff;font-family:sans-serif;overflow:hidden;user-select:none;transition:background 0.5s;}
 #gameCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 .ui{position:relative;z-index:10;pointer-events:none;padding:15px;display:flex;flex-direction:column;align-items:center;height:100vh;box-sizing:border-box;justify-content:space-between;}
@@ -6,7 +6,7 @@ body{margin:0;background:#03050d;color:#fff;font-family:sans-serif;overflow:hidd
 .money{font-size:26px;font-weight:900;color:#fbbf24;text-shadow:0 0 10px rgba(251,191,36,0.3);}
 .btn{pointer-events:auto;width:100%;padding:12px;background:linear-gradient(135deg,var(--neon),#00b4db);color:#03050d;border:none;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 0 20px rgba(0,255,204,0.2);margin-top:8px;}
 .btn:disabled{background:#1e293b;color:#475569;cursor:not-allowed;box-shadow:none;}
-.shop{pointer-events:auto;background:rgba(5,10,28,0.9);padding:10px;border-radius:20px;border:1px solid #1e293b;display:flex;gap:6px;width:90%;max-width:380px;box-sizing:border-box;}
+.shop{pointer-events:auto;background:rgba(5,10,28,0.9);padding:10px;border-radius:20px;border:1px solid #1e293b;display:flex;gap:8px;width:90%;max-width:380px;box-sizing:border-box;}
 .item{background:#090f24;border:1px solid #1e293b;padding:6px;border-radius:12px;text-align:center;flex:1;display:flex;flex-direction:column;justify-content:space-between;}
 .i-name{font-size:10px;font-weight:bold;color:#64748b;text-transform:uppercase;margin-bottom:4px;}
 .i-btn{background:#2563eb;color:#fff;border:none;padding:6px;border-radius:6px;font-size:10px;font-weight:bold;cursor:pointer;width:100%;}
@@ -36,22 +36,21 @@ body{margin:0;background:#03050d;color:#fff;font-family:sans-serif;overflow:hidd
 
     let ballRadius = 80; let targetRadius = 80; const particles = [];
 
-    // База данных биомов (Разнообразие графики)
+    // База данных биомов со сниженными лимитами для быстрого теста
     const biomes = [
         { name: "Локация: Сибирь ❄️", neon: "#00ffcc", secondary: "#008866", bg: "#03050d", gridColor: "#0a1024" },
-        { name: "Локация: Шельф пустыни 🏜️", neon: "#ff9900", secondary: "#995500", bg: "#0d0803", gridColor: "#24140a" },
-        { name: "Локация: Кибер-Завод 🏭", neon: "#39ff14", secondary: "#22990d", bg: "#030d05", gridColor: "rgba(57,255,20,0.08)" },
-        { name: "Локация: Космос-Станция 🌌", neon: "#e0115f", secondary: "#7a0933", bg: "#0a030d", gridColor: "#220a3a" }
+        { name: "Локация: Шельф пустыни 🏜️", neon: "#ff7700", secondary: "#993300", bg: "#0d0603", gridColor: "#240e0a" },
+        { name: "Локация: Кибер-Завод 🏭", neon: "#39ff14", secondary: "#1b8a05", bg: "#020803", gridColor: "rgba(57,255,20,0.06)" },
+        { name: "Локация: Станция Марс 🪐", neon: "#e0115f", secondary: "#7a0933", bg: "#0a020d", gridColor: "#22053a" }
     ];
     let currentBiomeIdx = 0;
 
     function selectBiome() {
-        // Локация меняется в зависимости от общего капитала и силы клика
-        let totalScore = money + (pps * 100);
-        if (totalScore < 300) currentBiomeIdx = 0;
-        else if (totalScore < 1500) currentBiomeIdx = 1;
-        else if (totalScore < 8000) currentBiomeIdx = 2;
-        else currentBiomeIdx = 3;
+        // Сверхбыстрая эволюция уровней по твоему текущему балансу!
+        if (money < 100) currentBiomeIdx = 0;      // 0-100 руб
+        else if (money < 300) currentBiomeIdx = 1; // 100-300 руб (Твой текущий уровень!)
+        else if (money < 1000) currentBiomeIdx = 2;// 300-1000 руб
+        else currentBiomeIdx = 3;                  // Больше 1000 руб
         
         let b = biomes[currentBiomeIdx];
         document.documentElement.style.setProperty('--neon', b.neon);
