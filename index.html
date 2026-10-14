@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Газовый Магнат: Симулятор ИИ</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0b0f19, #111827);
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+        }
+        h1 { margin-bottom: 5px; color: #00ffcc; text-shadow: 0 0 10px rgba(0,255,204,0.3); }
+        .stats { margin: 15px 0; font-size: 14px; color: #9ca3af; }
+        
+        .score-container {
+            font-size: 28px;
+            margin-bottom: 25px;
+            background: rgba(0, 255, 204, 0.05);
+            padding: 15px 30px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 204, 0.2);
+            font-weight: bold;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        /* Контейнер для клика с эффектом вылетающих цифр */
+        .click-area {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 20px;
+        }
+
+        #click-btn {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid #00ffcc;
+            /* Временная ИИ-заглушка (пламя), пока вы не подставите свою картинку */
+            background: #1f2937 url('https://icons8.com') center/65% no-repeat;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
+            transition: transform 0.05s, box-shadow 0.1s;
+        }
+        #click-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.6);
+        }
+
+        /* Стили вылетающего текста кубометров */
+        .floating-text {
+            position: absolute;
+            color: #00ffcc;
+            font-size: 24px;
+            font-weight: bold;
+            pointer-events: none;
+            animation: floatUp 0.6s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translate(-50%, -50%) translateY(0) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) translateY(-100px) scale(0.8); }
+        }
+
+        .shop {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 20px;
+            border-radius: 15px;
+            width: 350px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .shop h3 { margin-top: 0; color: #00ffcc; }
+        .shop-btn {
+            width: 100%;
+            padding: 14px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(to right, #00b4db, #0083b0);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: space-between;
+        }
+        .shop-btn:hover { filter: brightness(1.1); }
+        .shop-btn:disabled {
+            background: #1f2937;
+            color: #4b5563;
+            cursor: not-allowed;
+            filter: none;
+        }
+        .reset-btn {
+            margin-top: 30px;
+            background: none;
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .reset-btn:hover { background: #ef4444; color: white; }
+    </style>
+</head>
+<body>
+
+    <h1>Газовый Магнат</h1>
+    <div class="stats">Добыча: <span id="cps-val">0</span> м³/сек | За клик: +<span id="click-val">1</span> м³</div>
+    <div class="score-container">💨 <span id="balance">0</span> м³</div>
+
+    <div class="click-area" id="click-area">
+        <button id="click-btn"></button>
+    </div>
+
+    <div class="shop">
+        <h3>Энергетические Апгрейды</h3>
+        <button id="up-click-btn" class="shop-btn"><span>Ручной насос (+1 к клику)</span><span id="cost-click">10</span></button>
+        <button id="up-auto1-btn" class="shop-btn"><span>Малая скважина (+1 м³/с)</span><span id="cost-auto1">50</span></button>
+        <button id="up-auto2-btn" class="shop-btn"><span>Газопровод в город (+10 м³/с)</span><span id="cost-auto2">500</span></button>
+        <button id="up-auto3-btn" class="shop-btn"><span>СПГ-Терминал (+100 м³/с)</span><span id="cost-auto3">5000</span></button>
+    </div>
+
+    <button class="reset-btn" id="reset-btn">Сбросить империю</button>
+
+    <script {nonce}>
+        let balance = Number(localStorage.getItem('gas_balance')) || 0;
+        let clickPower = Number(localStorage.getItem('gas_clickPower')) || 1;
+        let cps = Number(localStorage.getItem('gas_cps')) || 0;
+
+        let costClick = Number(localStorage.getItem('gas_costClick')) || 10;
+        let costAuto1 = Number(localStorage.getItem('gas_costAuto1')) || 50;
+        let costAuto2 = Number(localStorage.getItem('gas_costAuto2')) || 500;
+        let costAuto3 = Number(localStorage.getItem('gas_costAuto3')) || 5000;
+
+        const balanceEl = document.getElementById('balance');
+        const cpsEl = document.getElementById('cps-val');
+        const clickEl = document.getElementById('click-val');
+        
+        const clickBtn = document.getElementById('click-btn');
+        const clickArea = document.getElementById('click-area');
+        
+        const upClickBtn = document.getElementById('up-click-btn');
+        const upAuto1Btn = document.getElementById('up-auto1-btn');
+        const upAuto2Btn = document.getElementById('up-auto2-btn');
+        const upAuto3Btn = document.getElementById('up-auto3-btn');
+        
+        const costClickEl = document.getElementById('cost-click');
+        const costAuto1El = document.getElementById('cost-auto1');
+        const costAuto2El = document.getElementById('cost-auto2');
+        const costAuto3El = document.getElementById('cost-auto3');
+        const resetBtn = document.getElementById('reset-btn');
+
+        function updateUI() {
+            balanceEl.textContent = Math.floor(balance);
+            cpsEl.textContent = cps;
+            clickEl.textContent = clickPower;
+
+            costClickEl.textContent = costClick;
+            costAuto1El.textContent = costAuto1;
+            costAuto2El.textContent = costAuto2;
+            costAuto3El.textContent = costAuto3;
+            
+            upClickBtn.disabled = balance < costClick;
+            upAuto1Btn.disabled = balance < costAuto1;
+            upAuto2Btn.disabled = balance < costAuto2;
+            upAuto3Btn.disabled = balance < costAuto3;
+        }
+
+        // Клик и создание вылетающего текста
+        clickBtn.addEventListener('click', (e) => {
+            balance += clickPower;
+            updateUI();
+            createFloatingText(clickPower);
+        });
+
+        function createFloatingText(amount) {
+            const text = document.createElement('div');
+            text.className = 'floating-text';
+            text.textContent = `+${amount}`;
+            
+            // Позиционирование по центру кнопки со случайным небольшим сдвигом
+            text.style.left = `50%`;
+            text.style.top = `50%`;
+            
+            clickArea.appendChild(text);
+            
+            setTimeout(() => { text.remove(); }, 600);
+        }
+
+        // Логика покупки
+        upClickBtn.addEventListener('click', () => {
+            if (balance >= costClick) { balance -= costClick; clickPower += 1; costClick = Math.round(costClick * 1.5); updateUI(); saveGame(); }
+        });
+        upAuto1Btn.addEventListener('click', () => {
+            if (balance >= costAuto1) { balance -= costAuto1; cps += 1; costAuto1 = Math.round(costAuto1 * 1.6); updateUI(); saveGame(); }
+        });
+        upAuto2Btn.addEventListener('click', () => {
+            if (balance >= costAuto2) { balance -= costAuto2; cps += 10; costAuto2 = Math.round(costAuto2 * 1.6); updateUI(); saveGame(); }
+        });
+        upAuto3Btn.addEventListener('click', () => {
+            if (balance >= costAuto3) { balance -= costAuto3; cps += 100; costAuto3 = Math.round(costAuto3 * 1.7); updateUI(); saveGame(); }
+        });
+
+        function saveGame() {
+            localStorage.setItem('gas_balance', balance);
+            localStorage.setItem('gas_clickPower', clickPower);
+            localStorage.setItem('gas_cps', cps);
+            localStorage.setItem('gas_costClick', costClick);
+            localStorage.setItem('gas_costAuto1', costAuto1);
+            localStorage.setItem('gas_costAuto2', costAuto2);
+            localStorage.setItem('gas_costAuto3', costAuto3);
+        }
+
+        setInterval(() => { if (cps > 0) { balance += cps / 10; updateUI(); } }, 100);
+        setInterval(saveGame, 5000);
+
+        resetBtn.addEventListener('click', () => {
+            if(confirm("Обнулить всю газовую империю?")) { localStorage.clear(); location.reload(); }
+        });
+
+        updateUI();
+    </script>
+</body>
+</html>
