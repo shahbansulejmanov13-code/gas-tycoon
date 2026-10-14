@@ -1,331 +1,52 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Газовый Магнат 6.0: Неоновый Бум</title>
-    <!-- Подключаем официальный SDK Яндекс Игр -->
-    <script src="https://yandex.ru"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #04060e, #0a0f24);
-            color: #f8fafc; margin: 0; padding: 15px;
-            display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh; user-select: none;
-            overflow-x: hidden;
-        }
-        .game-container {
-            width: 100%; max-width: 430px;
-            background: rgba(10, 16, 36, 0.95);
-            border: 2px solid #1e293b; border-radius: 28px;
-            padding: 25px; box-sizing: border-box;
-            box-shadow: 0 30px 70px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,255,204,0.05);
-            text-align: center;
-        }
-        h1 { margin: 0 0 15px 0; color: #00ffcc; font-size: 24px; text-shadow: 0 0 15px rgba(0,255,204,0.4); font-weight: 900; }
-        
-        /* Табло баланса */
-        .scoreboard {
-            background: rgba(2, 6, 23, 0.6); border: 1px solid #1e293b;
-            border-radius: 20px; padding: 15px; margin-bottom: 20px;
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
-        }
-        .money-display { font-size: 28px; font-weight: 900; color: #fbbf24; text-shadow: 0 0 10px rgba(251,191,36,0.2); }
-        .gas-display { font-size: 18px; font-weight: 700; color: #38bdf8; margin-top: 5px; }
-        .income-info { font-size: 12px; color: #64748b; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-        /* Главная интерактивная зона кликера */
-        .click-zone { position: relative; width: 100%; height: 210px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
-        
-        /* Огромная неоновая 3D-кнопка баллона */
-        .gas-balloon {
-            width: 160px; height: 160px; border-radius: 50%;
-            background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
-            border: 5px solid #00ffcc; cursor: pointer;
-            box-shadow: 0 0 35px rgba(0,255,204,0.25), inset 0 0 15px rgba(0,255,204,0.2);
-            display: flex; align-items: center; justify-content: center;
-            transition: transform 0.05s ease, box-shadow 0.1s ease;
-            outline: none; -webkit-tap-highlight-color: transparent;
-        }
-        .gas-balloon:active {
-            transform: scale(0.93);
-            box-shadow: 0 0 50px rgba(0,255,204,0.5), inset 0 0 25px rgba(0,255,204,0.4);
-        }
-        .flame-core {
-            width: 70px; height: 70px; background: #00ffcc;
-            clip-path: polygon(50% 0%, 85% 25%, 100% 55%, 80% 90%, 50% 100%, 20% 90%, 0% 55%, 15% 25%);
-            filter: drop-shadow(0 0 12px #00ffcc);
-            animation: float-pulse 1.2s infinite alternate ease-in-out;
-        }
-        @keyframes float-pulse {
-            0% { transform: scale(0.95) translateY(2px); filter: drop-shadow(0 0 10px #00ffcc); }
-            100% { transform: scale(1.05) translateY(-2px); filter: drop-shadow(0 0 18px #00ffcc); }
-        }
-
-        /* Вылетающие цифры +1 */
-        .click-pop {
-            position: absolute; color: #00ffcc; font-size: 24px; font-weight: 900;
-            pointer-events: none; animation: pop-up 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-            text-shadow: 0 0 10px #00ffcc;
-        }
-        @keyframes pop-up {
-            0% { opacity: 1; transform: translate(-50%, -50%) scale(1) translateY(0); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.7) translateY(-90px); }
-        }
-
-        /* Кнопка мгновенной продажи */
-        .btn-sell {
-            width: 100%; padding: 14px; background: linear-gradient(135deg, #fbbf24, #d97706);
-            color: #04060e; border: none; border-radius: 16px; font-size: 15px; font-weight: 900;
-            cursor: pointer; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(217,119,6,0.25);
-            transition: all 0.2s; letter-spacing: 0.5px;
-        }
-        .btn-sell:hover { filter: brightness(1.1); box-shadow: 0 5px 25px rgba(217,119,6,0.4); }
-        .btn-sell:disabled { background: #1e293b; color: #475569; cursor: not-allowed; box-shadow: none; filter: none; }
-
-        /* Магазин апгрейдов */
-        .upgrades-panel { background: rgba(15, 23, 42, 0.4); border: 1px solid #1e293b; border-radius: 20px; padding: 15px; text-align: left; }
-        .upgrades-panel h3 { margin: 0 0 12px 0; font-size: 14px; color: #00ffcc; text-transform: uppercase; letter-spacing: 0.5px; }
-        .upgrade-card {
-            background: #0f172a; border: 1px solid #1e293b; border-radius: 12px;
-            padding: 12px; margin: 8px 0; display: flex; justify-content: space-between; align-items: center;
-            transition: border-color 0.2s;
-        }
-        .upgrade-card:hover { border-color: #334155; }
-        .up-info { display: flex; flex-direction: column; gap: 3px; }
-        .up-name { font-size: 13px; font-weight: bold; color: #f1f5f9; }
-        .up-desc { font-size: 11px; color: #64748b; }
-        .up-btn {
-            background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white;
-            border: none; padding: 8px 14px; border-radius: 8px; font-size: 12px;
-            font-weight: bold; cursor: pointer; transition: all 0.2s; min-width: 85px; text-align: center;
-        }
-        .up-btn:disabled { background: #1e293b; color: #475569; cursor: not-allowed; }
-        
-        .btn-reset { margin-top: 20px; background: none; border: 1px solid #ef4444; color: #ef4444; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; }
-        .btn-reset:hover { background: #ef4444; color: white; }
-    </style>
-</head>
-<body>
-
-    <div class="game-container">
-        <h1>ГАЗОВЫЙ МАГНАТ</h1>
-
-        <!-- Табло счетов -->
-        <div class="scoreboard">
-            <div class="money-display" id="money-display">0 руб.</div>
-            <div class="gas-display" id="gas-display">Хранилище: 0 м³</div>
-            <div class="income-info">Клик: +<span id="click-power-display">1</span> м³ | Пассив: +<span id="pps-display">0</span> м³/с</div>
-        </div>
-
-        <!-- Кнопка продажи накопленного -->
-        <button class="btn-sell" id="btn-sell" disabled>💸 ПРОДАТЬ НАКОПЛЕННЫЙ ГАЗ (Курс: 3.5 ₽)</button>
-
-        <!-- Рабочая зона кликера -->
-        <div class="click-zone" id="click-zone">
-            <button class="gas-balloon" id="gas-balloon" aria-label="Добыть газ">
-                <div class="flame-core"></div>
-            </button>
-        </div>
-
-        <!-- Магазин корпорации -->
-        <div class="upgrades-panel">
-            <h3>🛒 Прокачка инфраструктуры</h3>
-            
-            <div class="upgrade-card">
-                <div class="up-info">
-                    <span class="up-name">🔧 Модернизация вентиля</span>
-                    <span class="up-desc">Увеличивает силу клика на +1 м³</span>
-                </div>
-                <button class="up-btn" id="buy-click">15 руб.</button>
-            </div>
-
-            <div class="upgrade-card">
-                <div class="up-info">
-                    <span class="up-name">🚜 Буровая установка</span>
-                    <span class="up-desc">Автоматически добывает +1 м³/сек</span>
-                </div>
-                <button class="up-btn" id="buy-auto1">80 руб.</button>
-            </div>
-
-            <div class="upgrade-card">
-                <div class="up-info">
-                    <span class="up-name">🏢 Магистральный провод</span>
-                    <span class="up-desc">Автоматически добывает +12 м³/сек</span>
-                </div>
-                <button class="up-btn" id="buy-auto2">750 руб.</button>
-            </div>
-        </div>
-
-        <button class="btn-reset" id="btn-reset">Обнулить прогресс</button>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Газовый Магнат</title><script src="https://yandex.ru"></script><style>
+body{background:#04060f;color:#fff;font-family:sans-serif;text-align:center;padding:20px;}
+.box{max-width:380px;margin:0 auto;background:#0d1632;padding:20px;border-radius:20px;border:2px solid #1e293b;}
+h1{color:#00ffcc;margin:0 0 10px 0;}
+.board{background:#020617;padding:15px;border-radius:12px;margin-bottom:15px;}
+.btn{width:100%;padding:12px;margin:5px 0;border:none;border-radius:10px;font-weight:bold;cursor:pointer;}
+.sell{background:#fbbf24;color:#000;font-size:14px;}
+.balloon{width:100px;height:100px;border-radius:50%;background:#00ffcc;box-shadow:0 0 20px #00ffcc;margin:15px auto;cursor:pointer;border:none;}
+.balloon:active{transform:scale(0.92);}
+.shop{text-align:left;background:rgba(0,0,0,0.3);padding:10px;border-radius:12px;}
+.item{display:flex;justify-content:space-between;align-items:center;margin:8px 0;font-size:12px;}
+.buy{background:#2563eb;color:#fff;padding:5px 10px;border:none;border-radius:5px;cursor:pointer;}
+</style></head><body><div class="box">
+    <h1>ГАЗОВЫЙ МАГНАТ</h1>
+    <div class="board">
+        <div id="m-disp" style="font-size:24px;color:#fbbf24;font-weight:bold;">0 руб.</div>
+        <div id="g-disp" style="margin:5px 0;color:#38bdf8;">Хранилище: 0.0 м³</div>
+        <div style="font-size:11px;color:#64748b;">Клик: +<span id="c-pow">1</span> | Пассив: +<span id="pps">0</span> м³/с</div>
     </div>
-    <script {nonce}>
-        // Подключение Яндекс Игр SDK
-        let ysdkInstance = null;
-        if (typeof YaGames !== 'undefined') {
-            YaGames.init().then(ysdk => {
-                ysdkInstance = ysdk;
-                // Показываем полноэкранную рекламу при старте
-                ysdk.adv.showFullscreenAdv({ callbacks: {} });
-            });
-        }
-
-        // Состояние игры (Загрузка сохранений)
-        let money = Number(localStorage.getItem('gm6_money')) || 0;
-        let gas = Number(localStorage.getItem('gm6_gas')) || 0;
-        let clickPower = Number(localStorage.getItem('gm6_clickPower')) || 1;
-        let pps = Number(localStorage.getItem('gm6_pps')) || 0; // Пассивный доход в сек
-
-        let costClick = Number(localStorage.getItem('gm6_costClick')) || 15;
-        let costAuto1 = Number(localStorage.getItem('gm6_costAuto1')) || 80;
-        let costAuto2 = Number(localStorage.getItem('gm6_costAuto2')) || 750;
-
-        const gasPrice = 3.5; // Фиксированная цена продажи за 1 м³
-
-        // Линковка элементов
-        const moneyEl = document.getElementById('money-display');
-        const gasEl = document.getElementById('gas-display');
-        const clickPowerEl = document.getElementById('click-power-display');
-        const ppsEl = document.getElementById('pps-display');
-        
-        const btnSell = document.getElementById('btn-sell');
-        const balloon = document.getElementById('gas-balloon');
-        const clickZone = document.getElementById('click-zone');
-
-        const btnBuyClick = document.getElementById('buy-click');
-        const btnBuyAuto1 = document.getElementById('buy-auto1');
-        const btnBuyAuto2 = document.getElementById('buy-auto2');
-
-        function updateUI() {
-            moneyEl.textContent = Math.floor(money).toLocaleString('ru-RU') + " руб.";
-            gasEl.textContent = "Хранилище: " + gas.toFixed(1) + " м³";
-            clickPowerEl.textContent = clickPower;
-            ppsEl.textContent = pps;
-
-            btnBuyClick.textContent = costClick + " руб.";
-            btnBuyAuto1.textContent = costAuto1 + " руб.";
-            btnBuyAuto2.textContent = costAuto2 + " руб.";
-
-            // Управление активностью кнопок
-            btnSell.disabled = gas <= 0;
-            btnSell.textContent = gas > 0 
-                ? `💸 ПРОДАТЬ ГАЗ ЗА +${Math.floor(gas * gasPrice).toLocaleString('ru-RU')} РУБ.`
-                : `💸 ХРАНИЛИЩЕ ПУСТО`;
-
-            btnBuyClick.disabled = money < costClick;
-            btnBuyAuto1.disabled = money < costAuto1;
-            btnBuyAuto2.disabled = money < costAuto2;
-        }
-
-        // Механика ручного клика по неоновому баллону
-        balloon.addEventListener('click', (e) => {
-            gas += clickPower;
-            updateUI();
-            createFloatingText(e, clickPower);
-            saveGame();
-        });
-
-        // Создание красивых вылетающих циферок "+1" в месте клика
-        function createFloatingText(e, amount) {
-            const rect = clickZone.getBoundingClientRect();
-            let clickX, clickY;
-            
-            // Проверка для мобилок (тач) или мышки
-            if (e.clientX) {
-                clickX = e.clientX - rect.left;
-                clickY = e.clientY - rect.top;
-            } else {
-                clickX = rect.width / 2;
-                clickY = rect.height / 2;
-            }
-
-            const pop = document.createElement('div');
-            pop.className = 'click-pop';
-            pop.textContent = `+${amount} м³`;
-            pop.style.left = clickX + 'px';
-            pop.style.top = clickY + 'px';
-
-            clickZone.appendChild(pop);
-            setTimeout(() => pop.remove(), 500);
-        }
-
-        // Механика продажи газа за рубли
-        btnSell.addEventListener('click', () => {
-            if (gas > 0) {
-                let revenue = gas * gasPrice;
-                money += revenue;
-                gas = 0;
-                updateUI();
-                saveGame();
-                
-                // Включаем короткий виброотклик на смартфонах при сделке
-                if (navigator.vibrate) navigator.vibrate(50);
-            }
-        });
-
-        // Покупка улучшений в магазине
-        btnBuyClick.addEventListener('click', () => {
-            if (money >= costClick) {
-                money -= costClick;
-                clickPower += 1;
-                costClick = Math.round(costClick * 1.5);
-                updateUI();
-                saveGame();
-            }
-        });
-
-        btnBuyAuto1.addEventListener('click', () => {
-            if (money >= costAuto1) {
-                money -= costAuto1;
-                pps += 1;
-                costAuto1 = Math.round(costAuto1 * 1.6);
-                updateUI();
-                saveGame();
-            }
-        });
-
-        btnBuyAuto2.addEventListener('click', () => {
-            if (money >= costAuto2) {
-                money -= costAuto2;
-                pps += 12;
-                costAuto2 = Math.round(costAuto2 * 1.6);
-                updateUI();
-                saveGame();
-            }
-        });
-
-        // Функция автоматического сохранения прогресса
-        function saveGame() {
-            localStorage.setItem('gm6_money', money);
-            localStorage.setItem('gm6_gas', gas);
-            localStorage.setItem('gm6_clickPower', clickPower);
-            localStorage.setItem('gm6_pps', pps);
-            localStorage.setItem('gm6_costClick', costClick);
-            localStorage.setItem('gm6_costAuto1', costAuto1);
-            localStorage.setItem('gm6_costAuto2', costAuto2);
-        }
-
-        // Двигатель пассивного дохода (работает каждые 100 миллисекунд для плавности)
-        setInterval(() => {
-            if (pps > 0) {
-                gas += pps / 10;
-                updateUI();
-            }
-        }, 100);
-
-        // Периодическое автосохранение в память раз в 10 секунд
-        setInterval(saveGame, 10000);
-
-        // Кнопка полного сброса
-        document.getElementById('btn-reset').addEventListener('click', () => {
-            if(confirm("Вы уверены, что хотите обнулить весь прогресс газовой корпорации?")) {
-                localStorage.clear();
-                location.reload();
-            }
-        });
-
-        updateUI();
-    </script>
-</body>
-</html>
+    <div style="font-size:12px;margin-bottom:10px;"><span id="m-rate">Курс: 2.50 руб</span> | <span id="m-trend" style="color:#22c55e;">📈 Растет</span></div>
+    <button class="btn sell" id="btn-sell" disabled>ХРАНИЛИЩЕ ПУСТО</button>
+    <button class="balloon" id="balloon"></button>
+    <div class="shop">
+        <div class="item"><span>🔧 Вентиль (Клик +1)</span><button class="buy" id="b-click">15 р.</button></div>
+        <div class="item"><span>🚜 Вышка (+1/с)</span><button class="buy" id="b-auto1">100 р.</button></div>
+        <div class="item"><span>🏢 Газопровод (+15/с)</span><button class="buy" id="b-auto2">850 р.</button></div>
+    </div>
+    <button style="background:none;border:none;color:#ef4444;font-size:10px;margin-top:15px;cursor:pointer;" id="reset">Сбросить игру</button>
+</div><script {nonce}>
+    let ysdkInstance = null; if (typeof YaGames!=='undefined'){YaGames.init().then(ysdk=>{ysdkInstance=ysdk;ysdk.adv.showFullscreenAdv({callbacks:{}});});}
+    let money=Number(localStorage.getItem('g_money'))||0, gas=Number(localStorage.getItem('g_gas'))||0, clickPower=Number(localStorage.getItem('g_clickPower'))||1, pps=Number(localStorage.getItem('g_pps'))||0;
+    let costClick=Number(localStorage.getItem('g_cClick'))||15, costAuto1=Number(localStorage.getItem('g_cAuto1'))||100, costAuto2=Number(localStorage.getItem('g_cAuto2'))||850, marketPrice = 2.50;
+    const mDisp=document.getElementById('m-disp'), gDisp=document.getElementById('g-disp'), cPowEl=document.getElementById('c-pow'), ppsEl=document.getElementById('pps'), mRateEl=document.getElementById('m-rate'), mTrendEl=document.getElementById('m-trend'), btnSell=document.getElementById('btn-sell'), balloon=document.getElementById('balloon'), bClick=document.getElementById('b-click'), bAuto1=document.getElementById('b-auto1'), bAuto2=document.getElementById('b-auto2');
+    function updateUI(){
+        mDisp.textContent=Math.floor(money).toLocaleString('ru-RU')+" руб."; gDisp.textContent="Хранилище: "+gas.toFixed(1)+" м³"; cPowEl.textContent=clickPower; ppsEl.textContent=pps;
+        bClick.textContent=costClick+" руб."; bAuto1.textContent=costAuto1+" руб."; bAuto2.textContent=costAuto2+" руб.";
+        bClick.disabled=money<costClick; bAuto1.disabled=money<costAuto1; bAuto2.disabled=money<costAuto2; btnSell.disabled=gas<=0;
+        btnSell.textContent=gas>0?`💸 ПРОДАТЬ ЗА +${Math.floor(gas*marketPrice).toLocaleString('ru-RU')} РУБ.`:`💸 ХРАНИЛИЩЕ ПУСТО`;
+    }
+    balloon.addEventListener('click',()=>{gas+=clickPower; updateUI(); saveGame();});
+    btnSell.addEventListener('click',()=>{if(gas>0){money+=gas*marketPrice; gas=0; updateUI(); saveGame();}});
+    bClick.addEventListener('click',()=>{if(money>=costClick){money-=costClick; clickPower+=1; costClick=Math.round(costClick*1.5); updateUI(); saveGame();}});
+    bAuto1.addEventListener('click',()=>{if(money>=costAuto1){money-=costAuto1; pps+=1; costAuto1=Math.round(costAuto1 * 1.6); updateUI(); saveGame();}});
+    bAuto2.addEventListener('click',()=>{if(money>=costAuto2){money-=costAuto2; pps+=15; costAuto2=Math.round(costAuto2 * 1.6); updateUI(); saveGame();}});
+    setInterval(()=>{
+        let old=marketPrice; marketPrice+=(Math.random()*1.6)-0.8; marketPrice=Math.min(8.50,Math.max(1.50,marketPrice)); mRateEl.textContent=`Курс: ${marketPrice.toFixed(2)} руб`;
+        if(marketPrice>=old){mTrendEl.textContent="📈 Растет"; mTrendEl.className="trend-up";}else{mTrendEl.textContent="📉 Падает"; mTrendEl.className="trend-down";} updateUI();
+    },12000);
+    function saveGame(){localStorage.setItem('g_money',money); localStorage.setItem('g_gas',gas); localStorage.setItem('g_clickPower',clickPower); localStorage.setItem('g_pps',pps); localStorage.setItem('g_cClick',costClick); localStorage.setItem('g_cAuto1',costAuto1); localStorage.setItem('g_cAuto2',costAuto2);}
+    setInterval(()=>{if(pps > 0){gas+=pps/10; updateUI();}},100);
+    document.getElementById('reset').addEventListener('click',()=>{if(confirm("Сбросить?")){localStorage.clear(); location.reload();}}); updateUI();
+</script></body></html>
