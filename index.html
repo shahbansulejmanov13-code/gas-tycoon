@@ -1,22 +1,20 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Gas Tycoon 3D</title><script src="https://cloudflare.com"></script><script src="https://yandex.ru"></script><style>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Gas Tycoon</title><script src="https://yandex.ru"></script><style>
 body{margin:0;background:#03050d;color:#fff;font-family:sans-serif;overflow:hidden;user-select:none;}
-#c3d{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
+#gameCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 .ui{position:relative;z-index:10;pointer-events:none;padding:20px;display:flex;flex-direction:column;align-items:center;height:100vh;box-sizing:border-box;justify-content:space-between;}
-.board{background:rgba(5,10,28,0.85);padding:15px 30px;border-radius:20px;border:1px solid #1e293b;backdrop-filter:blur(8px);pointer-events:auto;text-align:center;box-shadow:0 15px 40px rgba(0,0,0,0.6);}
-.money{font-size:32px;font-weight:900;color:#fbbf24;text-shadow:0 0 10px rgba(251,191,36,0.3);}
-.gas{font-size:16px;color:#38bdf8;margin:4px 0;font-weight:bold;}
-.btn{pointer-events:auto;padding:14px 28px;background:linear-gradient(135deg,#00ffcc,#00b4db);color:#03050d;border:none;border-radius:14px;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 0 20px rgba(0,255,204,0.3);transition:transform 0.1s;}
-.btn:active{transform:scale(0.95);}
-.shop{pointer-events:auto;background:rgba(5,10,28,0.85);padding:12px;border-radius:16px;border:1px solid #1e293b;backdrop-filter:blur(8px);display:flex;gap:8px;max-width:400px;overflow-x:auto;}
-.item{background:#090f24;border:1px solid #1e293b;padding:8px 12px;border-radius:10px;text-align:center;min-width:105px;box-sizing:border-box;}
+.board{background:rgba(5,10,28,0.9);padding:12px 25px;border-radius:20px;border:1px solid #1e293b;backdrop-filter:blur(8px);pointer-events:auto;text-align:center;box-shadow:0 15px 40px rgba(0,0,0,0.6);}
+.money{font-size:28px;font-weight:900;color:#fbbf24;text-shadow:0 0 10px rgba(251,191,36,0.3);}
+.btn{pointer-events:auto;padding:12px 24px;background:linear-gradient(135deg,#00ffcc,#00b4db);color:#03050d;border:none;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 0 20px rgba(0,255,204,0.3);}
+.shop{pointer-events:auto;background:rgba(5,10,28,0.9);padding:10px;border-radius:16px;border:1px solid #1e293b;display:flex;gap:8px;max-width:400px;overflow-x:auto;}
+.item{background:#090f24;border:1px solid #1e293b;padding:6px 10px;border-radius:10px;text-align:center;min-width:105px;}
 .i-name{font-size:10px;font-weight:bold;color:#64748b;text-transform:uppercase;}
 .i-btn{background:#2563eb;color:#fff;border:none;padding:4px 8px;border-radius:5px;font-size:10px;font-weight:bold;cursor:pointer;margin-top:4px;width:100%;}
 .i-btn:disabled{background:#1e293b;color:#475569;cursor:not-allowed;}
-</style></head><body><canvas id="c3d"></canvas><div class="ui">
+</style></head><body><canvas id="gameCanvas"></canvas><div class="ui">
     <div class="board">
         <div class="money" id="m-disp">0 руб.</div>
-        <div class="gas" id="g-disp">В баках: 0.0 м³</div>
-        <div style="font-size:10px;color:#64748b;margin-top:4px;font-weight:bold;">КЛИК: +<span id="c-pow">1</span> | АВТОДОБЫЧА: +<span id="pps">0</span> м³/с</div>
+        <div style="font-size:15px;color:#38bdf8;font-weight:bold;margin:2px 0;" id="g-disp">В баках: 0.0 м³</div>
+        <div style="font-size:10px;color:#64748b;font-weight:bold;">КЛИК: +<span id="c-pow">1</span> | ПАССИВ: +<span id="pps">0</span> м³/с</div>
     </div>
     <button class="btn" id="btn-sell">💸 ПРОДАТЬ ВЕСЬ ГАЗ (КУРС: 3.5 ₽)</button>
     <div class="shop">
@@ -26,78 +24,76 @@ body{margin:0;background:#03050d;color:#fff;font-family:sans-serif;overflow:hidd
     </div>
 </div><script {nonce}>
     let ysdkInstance = null; if (typeof YaGames!=='undefined'){YaGames.init().then(ysdk=>{ysdkInstance=ysdk;ysdk.adv.showFullscreenAdv({callbacks:{}});});}
-    let money=Number(localStorage.getItem('g3_money'))||0, gas=Number(localStorage.getItem('g3_gas'))||0, clickPower=Number(localStorage.getItem('g3_clickPower'))||1, pps=Number(localStorage.getItem('g3_pps'))||0;
-    let costClick=Number(localStorage.getItem('g3_cClick'))||15, costAuto1=Number(localStorage.getItem('g3_cAuto1'))||100, costAuto2=Number(localStorage.getItem('g3_cAuto2'))||850;
+    let money=Number(localStorage.getItem('gn_money'))||0, gas=Number(localStorage.getItem('gn_gas'))||0, clickPower=Number(localStorage.getItem('gn_clickPower'))||1, pps=Number(localStorage.getItem('gn_pps'))||0;
+    let costClick=Number(localStorage.getItem('gn_cClick'))||15, costAuto1=Number(localStorage.getItem('gn_cAuto1'))||100, costAuto2=Number(localStorage.getItem('gn_cAuto2'))||850;
     const mDisp=document.getElementById('m-disp'),gDisp=document.getElementById('g-disp'),cPowEl=document.getElementById('c-pow'),ppsEl=document.getElementById('pps'),btnSell=document.getElementById('btn-sell'),bClick=document.getElementById('b-click'),bAuto1=document.getElementById('b-auto1'),bAuto2=document.getElementById('b-auto2');
     
-    // --- 3D ДВИЖОК THREE.JS НА МАКСИМУМ ---
-    const scene = new THREE.Scene(); scene.background = new THREE.Color(0x03050d); scene.fog = new THREE.FogExp2(0x03050d, 0.05);
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100); camera.position.set(0, 4, 7); camera.lookAt(0, 0.5, 0);
-    const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('c3d'), antialias:true}); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // --- ГРАФИЧЕСКИЙ ДВИЖОК CANVAS ---
+    const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getContext('2d');
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } window.addEventListener('resize', resize); resize();
+
+    let ballRadius = 70; let targetRadius = 70; const particles = [];
     
-    // Свет и Глянцевый пол
-    const light = new THREE.DirectionalLight(0xffffff, 1); light.position.set(5, 10, 7); scene.add(light);
-    const ambient = new THREE.AmbientLight(0x0a1128, 1.5); scene.add(ambient);
-    const floorGeo = new THREE.PlaneGeometry(50, 50); const floorMat = new THREE.MeshStandardMaterial({color:0x070b19, roughness:0.2, metalness:0.8}); const floor = new THREE.Mesh(floorGeo, floorMat); floor.rotation.x = -Math.PI/2; scene.add(floor);
-    
-    // Киберпанк 3D-Баллон
-    const cylinderGeo = new THREE.CylinderGeometry(0.8, 0.8, 2, 32); const cylinderMat = new THREE.MeshStandardMaterial({color:0x0f172a, roughness:0.1, metalness:0.9, emissive:0x00ffcc, emissiveIntensity:0.4}); const balloon3D = new THREE.Mesh(cylinderGeo, cylinderMat); balloon3D.position.y = 1; scene.add(balloon3D);
-    const ringGeo = new THREE.TorusGeometry(0.85, 0.05, 8, 32); const ringMat = new THREE.MeshBasicMaterial({color:0x00ffcc}); const ring = new THREE.Mesh(ringGeo, ringMat); ring.rotation.x = Math.PI/2; ring.position.y = 1; scene.add(ring);
-
-    // Сетка под баллоном
-    const grid = new THREE.GridHelper(20, 20, 0x00ffcc, 0x0f172a); grid.position.y = 0.01; scene.add(grid);
-
-    // Система 3D-частиц (Вылетающий газ)
-    const particleCount = 60; const pGeometry = new THREE.BufferGeometry(); const positions = new Float32Array(particleCount * 3); const velocities = [];
-    for(let i=0; i<particleCount*3; i+=3) { positions[i]=0; positions[i+1]=1; positions[i+2]=0; velocities.push(new THREE.Vector3(0,0,0)); }
-    pGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const pMaterial = new THREE.PointsMaterial({color:0x38bdf8, size:0.15, transparent:true, opacity:0, blending:THREE.AdditiveBlending}); const particleSystem = new THREE.Points(pGeometry, pMaterial); scene.add(particleSystem);
-
-    let targetScale = 1;
-    function updateUI(){
-        mDisp.textContent=Math.floor(money).toLocaleString('ru-RU')+" руб."; gDisp.textContent="В баках: "+gas.toFixed(1)+" м³"; cPowEl.textContent=clickPower; ppsEl.textContent=pps;
-        bClick.textContent=costClick+" р."; bAuto1.textContent=costAuto1+" р."; bAuto2.textContent=costAuto2+" р.";
-        bClick.disabled=money<costClick; bAuto1.disabled=money<costAuto1; bAuto2.disabled=money<costAuto2; btnSell.disabled=gas<=0;
+    function spawnParticles() {
+        for(let i=0; i<30; i++) {
+            particles.push({
+                x: canvas.width/2, y: canvas.height/2,
+                vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8 - 3,
+                size: Math.random() * 4 + 2, alpha: 1, color: Math.random() > 0.5 ? '#00ffcc' : '#38bdf8'
+            });
+        }
     }
-    
-    // Клик по 3D-экрану (Рэйкастинг)
-    const raycaster = new THREE.Raycaster(); const mouse = new THREE.Vector2();
+
+    function draw() {
+        ctx.fillStyle = '#03050d'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Рисуем футуристичную неоновую сетку на фоне
+        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1;
+        for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
+        for(let j=0; j<canvas.height; j+=40) { ctx.beginPath(); ctx.moveTo(0,j); ctx.lineTo(canvas.width,j); ctx.stroke(); }
+
+        // Обновляем физику частиц газа
+        for(let i = particles.length - 1; i >= 0; i--) {
+            let p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.alpha -= 0.02;
+            if(p.alpha <= 0) { particles.splice(i, 1); continue; }
+            ctx.save(); ctx.globalAlpha = p.alpha; ctx.shadowBlur = 10; ctx.shadowColor = p.color; ctx.fillStyle = p.color;
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.restore();
+        }
+
+        // Анимация плавного возвращения размера баллона-кнопки
+        ballRadius += (targetRadius - ballRadius) * 0.15;
+        
+        // Рисуем светящийся газовый баллон по центру
+        let cx = canvas.width / 2; let cy = canvas.height / 2;
+        ctx.save(); ctx.shadowBlur = 30; ctx.shadowColor = '#00ffcc';
+        let grad = ctx.createRadialGradient(cx, cy, 5, cx, cy, ballRadius); grad.addColorStop(0, '#00ffcc'); grad.addColorStop(1, '#009977');
+        ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(cx, cy, ballRadius, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
+        
+        requestAnimationFrame(draw);
+    }
+
     window.addEventListener('pointerdown', (e) => {
         if(e.target.tagName === 'BUTTON' || e.target.closest('.board') || e.target.closest('.shop')) return;
-        mouse.x = (e.clientX / window.innerWidth) * 2 - 1; mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(mouse, camera); const intersects = raycaster.intersectObject(balloon3D);
-        if(intersects.length > 0) {
-            gas += clickPower; updateUI(); saveGame(); targetScale = 0.85; // Сжатие баллона
-            // Взрыв 3D частиц
-            const pPos = pGeometry.attributes.position.array;
-            for(let i=0; i<particleCount; i++) {
-                pPos[i*3]=0; pPos[i*3+1]=1.2; pPos[i*3+2]=0;
-                velocities[i].set((Math.random()-0.5)*0.3, Math.random()*0.3, (Math.random()-0.5)*0.3);
-            }
-            pMaterial.opacity = 1; pGeometry.attributes.position.needsUpdate = true;
+        let cx = canvas.width / 2; let cy = canvas.height / 2;
+        let dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+        if(dist <= ballRadius + 10) {
+            gas += clickPower; updateUI(); saveGame();
+            ballRadius = 55; // Эффект сильного сжатия при клике
+            spawnParticles(); // Взрыв частиц газа
         }
     });
 
+    function updateUI(){
+        mDisp.textContent=Math.floor(money).toLocaleString('ru-RU')+" руб."; gDisp.textContent="В баках: "+gas.toFixed(1)+" м³"; cPowEl.textContent=clickPower; ppsEl.textContent=pps;
+        bClick.textContent=costClick+" р."; bAuto1.textContent=costAuto1+" р."; bAuto2.textContent=costAuto2+" р.";
+        bClick.disabled=money<costClick; bAuto1.disabled=money<costAuto1; bAuto2.disabled=money<costAuto2; btnSell.disabled=gas <= 0;
+    }
     btnSell.addEventListener('click',()=>{if(gas>0){money+=gas*3.5; gas=0; updateUI(); saveGame();}});
     bClick.addEventListener('click',()=>{if(money>=costClick){money-=costClick; clickPower+=1; costClick=Math.round(costClick*1.5); updateUI(); saveGame();}});
     bAuto1.addEventListener('click',()=>{if(money>=costAuto1){money-=costAuto1; pps+=1; costAuto1=Math.round(costAuto1*1.6); updateUI(); saveGame();}});
     bAuto2.addEventListener('click',()=>{if(money>=costAuto2){money-=costAuto2; pps+=15; costAuto2=Math.round(costAuto2*1.6); updateUI(); saveGame();}});
-    function saveGame(){localStorage.setItem('g3_money',money); localStorage.setItem('g3_gas',gas); localStorage.setItem('g3_clickPower',clickPower); localStorage.setItem('g3_pps',pps); localStorage.setItem('g3_cClick',costClick); localStorage.setItem('g3_cAuto1',costAuto1); localStorage.setItem('g3_cAuto2',costAuto2);}
-
-    // Плавная 3D Анимация
-    function animate() {
-        requestAnimationFrame(animate);
-        balloon3D.rotation.y += 0.01; ring.rotation.z -= 0.02;
-        // Плавный возврат формы баллона
-        targetScale += (1 - targetScale) * 0.1; balloon3D.scale.set(1, targetScale, 1);
-        // Физика частиц газа
-        const pPos = pGeometry.attributes.position.array;
-        for(let i=0; i<particleCount; i++) { pPos[i*3]+=velocities[i].x; pPos[i*3+1]+=velocities[i].y; pPos[i*3+2]+=velocities[i].z; velocities[i].y -= 0.005; }
-        if(pMaterial.opacity > 0) pMaterial.opacity -= 0.03; pGeometry.attributes.position.needsUpdate = true;
-        renderer.render(scene, camera);
-    }
+    function saveGame(){localStorage.setItem('gn_money',money); localStorage.setItem('gn_gas',gas); localStorage.setItem('gn_clickPower',clickPower); localStorage.setItem('gn_pps',pps); localStorage.setItem('gn_cClick',costClick); localStorage.setItem('gn_cAuto1',costAuto1); localStorage.setItem('gn_cAuto2',costAuto2);}
     setInterval(()=>{if(pps>0){gas+=pps/10; updateUI();}},100);
-    window.addEventListener('resize', () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
-    document.getElementById('reset').addEventListener('click',()=>{if(confirm("Сбросить?")){localStorage.clear();location.reload();}});
-    updateUI(); animate();
+    updateUI(); draw();
 </script></body></html>
