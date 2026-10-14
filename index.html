@@ -3,92 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Газовая Империя: Экономическая Стратегия</title>
+    <title>Газовая Империя 3.0: Мировое Господство</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #060814, #0b112c);
+            background: linear-gradient(135deg, #020617, #0f172a);
             color: white;
             text-align: center;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
             user-select: none;
         }
-        h1 { margin-bottom: 2px; color: #00ffcc; text-shadow: 0 0 15px rgba(0,255,204,0.4); font-size: 28px; }
-        .rank-badge { background: #1e293b; color: #38bdf8; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 15px; border: 1px solid #334155; }
-        .stats { margin: 10px 0; font-size: 14px; color: #9ca3af; }
+        h1 { margin: 0 0 5px 0; color: #00ffcc; text-shadow: 0 0 15px rgba(0,255,204,0.4); font-size: 26px; }
+        
+        .header-panel { display: flex; gap: 10px; margin-bottom: 10px; }
+        .rank-badge { background: #1e293b; color: #38bdf8; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #334155; }
+        .prestige-badge { background: #1e1b4b; color: #a855f7; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #4338ca; }
         
         .score-container {
-            font-size: 32px;
-            margin-bottom: 20px;
-            background: rgba(0, 255, 204, 0.03);
-            padding: 12px 35px;
-            border-radius: 16px;
-            border: 1px solid rgba(0, 255, 204, 0.25);
-            font-weight: 900;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-            letter-spacing: 1px;
+            font-size: 36px; margin-bottom: 10px; background: rgba(0, 255, 204, 0.02);
+            padding: 10px 40px; border-radius: 16px; border: 1px solid rgba(0, 255, 204, 0.2);
+            font-weight: 900; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
         }
+        .stats { margin-bottom: 15px; font-size: 13px; color: #9ca3af; }
+
+        /* Мини-игра Разведка */
+        .minigame-container {
+            width: 340px; background: #1e293b; border-radius: 12px; padding: 10px;
+            margin-bottom: 15px; border: 1px solid #475569; display: none;
+        }
+        .minigame-title { font-size: 12px; font-weight: bold; color: #fbbf24; margin-bottom: 5px; }
+        .bar-bg { width: 100%; height: 20px; background: #0f172a; border-radius: 10px; position: relative; overflow: hidden; }
+        .target-zone { width: 40px; height: 100%; background: #22c55e; position: absolute; left: 140px; box-shadow: 0 0 10px #22c55e; }
+        .slider-pointer { width: 6px; height: 100%; background: #ef4444; position: absolute; left: 0; }
+        .drill-btn { margin-top: 8px; width: 100%; padding: 6px; background: #fbbf24; color: black; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
         .event-box {
-            width: 330px;
-            height: 45px;
-            margin-bottom: 15px;
-            padding: 8px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px dashed #374151;
-            transition: all 0.3s ease;
+            width: 330px; height: 40px; margin-bottom: 15px; padding: 5px; border-radius: 10px;
+            font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center;
+            background: rgba(255, 255, 255, 0.01); border: 1px dashed #374151; transition: all 0.3s;
         }
-        .event-active { background: rgba(234, 179, 8, 0.15); border: 1px solid #eab308; color: #fde047; text-shadow: 0 0 8px rgba(234,179,8,0.3); }
+        .event-active { background: rgba(234, 179, 8, 0.15); border: 1px solid #eab308; color: #fde047; }
         .event-bad { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; }
 
-        .click-area { position: relative; width: 180px; height: 180px; margin-bottom: 20px; }
+        .click-area { position: relative; width: 160px; height: 160px; margin-bottom: 15px; }
         #click-btn {
             width: 100%; height: 100%; border-radius: 50%; border: 4px solid #00ffcc;
-            background: #111c3a; cursor: pointer; box-shadow: 0 0 35px rgba(0, 255, 204, 0.2);
-            transition: transform 0.05s, box-shadow 0.1s; display: flex; align-items: center; justify-content: center;
+            background: #0f172a; cursor: pointer; box-shadow: 0 0 30px rgba(0, 255, 204, 0.15);
+            transition: transform 0.05s; display: flex; align-items: center; justify-content: center;
         }
-        #click-btn:active { transform: scale(0.94); box-shadow: 0 0 20px rgba(0, 255, 204, 0.5); }
-        
+        #click-btn:active { transform: scale(0.95); }
         .flame-icon {
-            width: 85px; height: 85px; background: #00ffcc;
-            clip-path: polygon(50% 0%, 80% 20%, 95% 50%, 85% 85%, 50% 100%, 15% 85%, 5% 50%, 20% 20%);
-            animation: pulse 1s infinite alternate; filter: drop-shadow(0 0 15px #00ffcc);
+            width: 75px; height: 75px; background: #00ffcc;
+            clip-path: polygon(50% 0%, 85% 25%, 100% 55%, 80% 90%, 50% 100%, 20% 90%, 0% 55%, 15% 25%);
+            animation: pulse 0.8s infinite alternate; filter: drop-shadow(0 0 15px #00ffcc);
         }
-        @keyframes pulse { 0% { transform: scale(0.93); opacity: 0.8; } 100% { transform: scale(1.03); opacity: 1; } }
+        @keyframes pulse { 0% { transform: scale(0.95); } 100% { transform: scale(1.05); } }
 
-        .floating-text { position: absolute; color: #00ffcc; font-size: 24px; font-weight: bold; pointer-events: none; animation: floatUp 0.5s ease-out forwards; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, -50%) translateY(0); } 100% { opacity: 0; transform: translate(-50%, -50%) translateY(-80px); } }
+        .floating-text { position: absolute; color: #00ffcc; font-size: 22px; font-weight: bold; pointer-events: none; animation: floatUp 0.4s ease-out forwards; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, -50%) translateY(0); } 100% { opacity: 0; transform: translate(-50%, -50%) translateY(-70px); } }
 
-        .shop { background: rgba(15, 23, 42, 0.6); padding: 18px; border-radius: 16px; width: 340px; border: 1px solid rgba(255, 255, 255, 0.05); }
-        .shop h3 { margin-top: 0; color: #00ffcc; font-size: 16px; margin-bottom: 12px; }
+        .shop { background: rgba(15, 23, 42, 0.8); padding: 15px; border-radius: 16px; width: 340px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .shop h3 { margin: 0 0 10px 0; color: #00ffcc; font-size: 15px; }
         .shop-btn {
-            width: 100%; padding: 12px; margin: 6px 0; border: none; border-radius: 8px;
-            background: linear-gradient(to right, #1e40af, #3b82f6); color: white; font-size: 13px;
-            font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between;
+            width: 100%; padding: 10px; margin: 5px 0; border: none; border-radius: 8px;
+            background: linear-gradient(to right, #1d4ed8, #2563eb); color: white; font-size: 12px;
+            font-weight: bold; cursor: pointer; display: flex; justify-content: space-between;
         }
-        .shop-btn:hover { filter: brightness(1.15); }
-        .shop-btn:disabled { background: #1e293b; color: #64748b; cursor: not-allowed; filter: none; }
-        .reset-btn { margin-top: 25px; background: none; border: 1px solid #ef4444; color: #ef4444; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; }
+        .shop-btn:disabled { background: #1e293b; color: #475569; cursor: not-allowed; }
+        
+        .prestige-section { margin-top: 15px; width: 340px; }
+        .prestige-btn { width: 100%; padding: 10px; background: linear-gradient(to right, #6b21a8, #7c3aed); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .prestige-btn:disabled { background: #334155; color: #64748b; cursor: not-allowed; }
+        .reset-btn { margin-top: 15px; background: none; border: 1px solid #ef4444; color: #ef4444; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; }
     </style>
 </head>
 <body>
 
-    <h1>Газовая Империя</h1>
-    <div class="rank-badge" id="rank-val">Статус: Рабочий скважины</div>
+    <h1>Газовая Империя 3.0</h1>
+    <div class="header-panel">
+        <div class="rank-badge" id="rank-val">Ранг: Рабочий</div>
+        <div class="prestige-badge" id="shares-val">Акции: 0 (+0% дохода)</div>
+    </div>
     
     <div class="score-container">💨 <span id="balance">0</span> м³</div>
-    <div class="stats">Пассивный доход: <span id="cps-val">0</span> м³/с | За клик: +<span id="click-val">1</span> м³</div>
+    <div class="stats">Доход: <span id="cps-val">0</span> м³/с | Клик: +<span id="click-val">1</span></div>
+
+    <!-- Интерактивная Мини-игра Газоразведка -->
+    <div class="minigame-container" id="miner-box">
+        <div class="minigame-title">⛏️ ГАЗОРАЗВЕДКА: Попади в зеленую зону!</div>
+        <div class="bar-bg">
+            <div class="target-zone" id="target-zone"></div>
+            <div class="slider-pointer" id="pointer"></div>
+        </div>
+        <button class="drill-btn" id="drill-btn">БУРИТЬ!</button>
+    </div>
 
     <div class="event-box" id="event-box">На рынке всё спокойно...</div>
 
@@ -97,35 +110,49 @@
     </div>
 
     <div class="shop">
-        <h3>Управление активами</h3>
-        <button id="up-click-btn" class="shop-btn"><span>🔧 Модернизация вентиля (+1)</span><span id="cost-click">10</span></button>
-        <button id="up-auto1-btn" class="shop-btn"><span>🚜 Буровая установка (+1/с)</span><span id="cost-auto1">60</span></button>
-        <button id="up-auto2-btn" class="shop-btn"><span>🏢 Магистральный провод (+12/с)</span><span id="cost-auto2">600</span></button>
-        <button id="up-auto3-btn" class="shop-btn"><span>🌐 Экспортный контракт (+150/с)</span><span id="cost-auto3">6500</span></button>
+        <h3>Управление корпорацией</h3>
+        <button id="up-click-btn" class="shop-btn"><span>🔧 Новые технологии клика</span><span id="cost-click">10</span></button>
+        <button id="up-auto1-btn" class="shop-btn"><span>🚜 Газовая вышка (+1/с)</span><span id="cost-auto1">60</span></button>
+        <button id="up-auto2-btn" class="shop-btn"><span>🏢 Газопровод «Сибирь» (+15/с)</span><span id="cost-auto2">600</span></button>
+        <button id="up-auto3-btn" class="shop-btn"><span>🌐 Мировой терминал (+200/с)</span><span id="cost-auto3">7000</span></button>
     </div>
 
-    <button class="reset-btn" id="reset-btn">Сбросить активы</button>
-    <script {nonce}>
-        let balance = Number(localStorage.getItem('ge_balance')) || 0;
-        let clickPower = Number(localStorage.getItem('ge_clickPower')) || 1;
-        let cps = Number(localStorage.getItem('ge_cps')) || 0;
+    <div class="prestige-section">
+        <button id="prestige-btn" class="prestige-btn">Продать компанию за корпоративные Акции (Нужно: 100k м³)</button>
+    </div>
 
-        let costClick = Number(localStorage.getItem('ge_costClick')) || 10;
-        let costAuto1 = Number(localStorage.getItem('ge_costAuto1')) || 60;
-        let costAuto2 = Number(localStorage.getItem('ge_costAuto2')) || 600;
-        let costAuto3 = Number(localStorage.getItem('ge_costAuto3')) || 6500;
+    <button class="reset-btn" id="reset-btn">Сбросить все сохранения</button>
+    <script {nonce}>
+        let balance = Number(localStorage.getItem('g3_balance')) || 0;
+        let clickPower = Number(localStorage.getItem('g3_clickPower')) || 1;
+        let cps = Number(localStorage.getItem('g3_cps')) || 0;
+        let shares = Number(localStorage.getItem('g3_shares')) || 0;
+
+        let costClick = Number(localStorage.getItem('g3_costClick')) || 10;
+        let costAuto1 = Number(localStorage.getItem('g3_costAuto1')) || 60;
+        let costAuto2 = Number(localStorage.getItem('g3_costAuto2')) || 600;
+        let costAuto3 = Number(localStorage.getItem('g3_costAuto3')) || 7000;
 
         let eventMultiplier = 1;
+        let prestigeReward = 0;
+
+        // Элементы мини-игры
+        let pointerPos = 0;
+        let pointerDir = 1;
+        let gameInterval = null;
+        let targetLeft = 140;
 
         const balanceEl = document.getElementById('balance');
         const cpsEl = document.getElementById('cps-val');
         const clickEl = document.getElementById('click-val');
         const rankEl = document.getElementById('rank-val');
+        const sharesEl = document.getElementById('shares-val');
         const eventBox = document.getElementById('event-box');
+        const prestigeBtn = document.getElementById('prestige-btn');
         
+        // Переменные элементов кнопок
         const clickBtn = document.getElementById('click-btn');
         const clickArea = document.getElementById('click-area');
-        
         const upClickBtn = document.getElementById('up-click-btn');
         const upAuto1Btn = document.getElementById('up-auto1-btn');
         const upAuto2Btn = document.getElementById('up-auto2-btn');
@@ -136,10 +163,14 @@
         const costAuto2El = document.getElementById('cost-auto2');
         const costAuto3El = document.getElementById('cost-auto3');
 
+        function getMultiplier() { return 1 + (shares * 0.5); }
+
         function updateUI() {
+            let totalMultiplier = eventMultiplier * getMultiplier();
             balanceEl.textContent = Math.floor(balance).toLocaleString('ru-RU');
-            cpsEl.textContent = (cps * eventMultiplier).toFixed(1);
-            clickEl.textContent = clickPower * eventMultiplier;
+            cpsEl.textContent = (cps * totalMultiplier).toFixed(1);
+            clickEl.textContent = Math.round(clickPower * totalMultiplier);
+            sharesEl.textContent = `Акции: ${shares} (+${shares * 50}% дохода)`;
 
             costClickEl.textContent = costClick;
             costAuto1El.textContent = costAuto1;
@@ -151,18 +182,27 @@
             upAuto2Btn.disabled = balance < costAuto2;
             upAuto3Btn.disabled = balance < costAuto3;
 
+            // Расчет престижа
+            if (balance >= 100000) {
+                prestigeReward = Math.floor(Math.sqrt(balance / 100000));
+                prestigeBtn.disabled = false;
+                prestigeBtn.textContent = `🏢 Выйти на IPO! Получить Акции: +${prestigeReward}`;
+            } else {
+                prestigeBtn.disabled = true;
+                prestigeBtn.textContent = `🏢 Выйти на IPO (Нужно накопительно: 100 000 м³)` ;
+            }
             updateRank();
         }
 
         function updateRank() {
-            if (balance < 1000) rankEl.textContent = "Статус: Рабочий скважины";
-            else if (balance < 25000) rankEl.textContent = "Статус: Мастер участка 🛠️";
-            else if (balance < 500000) rankEl.textContent = "Статус: Директор филиала 🏢";
-            else rankEl.textContent = "Статус: Газовый Магнат 👑";
+            if (balance < 5000) rankEl.textContent = "Ранг: Начинающий бурильщик 🚜";
+            else if (balance < 50000) rankEl.textContent = "Ранг: Энергетический Поставщик ⚡";
+            else if (balance < 1000000) rankEl.textContent = "Ранг: Глава Газпрома 🏢";
+            else rankEl.textContent = "Ранг: Властелин Мирового Рынка 👑";
         }
 
         clickBtn.addEventListener('click', () => {
-            let gained = clickPower * eventMultiplier;
+            let gained = Math.round(clickPower * eventMultiplier * getMultiplier());
             balance += gained;
             updateUI();
             createFloatingText(gained);
@@ -172,51 +212,92 @@
             const text = document.createElement('div');
             text.className = 'floating-text';
             text.textContent = `+${amount}`;
-            text.style.left = `50%`;
-            text.style.top = `50%`;
+            text.style.left = `50%`; text.style.top = `50%`;
             clickArea.appendChild(text);
-            setTimeout(() => { text.remove(); }, 500);
+            setTimeout(() => text.remove(), 400);
         }
 
         upClickBtn.addEventListener('click', () => { if (balance >= costClick) { balance -= costClick; clickPower += 1; costClick = Math.round(costClick * 1.5); updateUI(); saveGame(); } });
         upAuto1Btn.addEventListener('click', () => { if (balance >= costAuto1) { balance -= costAuto1; cps += 1; costAuto1 = Math.round(costAuto1 * 1.6); updateUI(); saveGame(); } });
-        upAuto2Btn.addEventListener('click', () => { if (balance >= costAuto2) { balance -= costAuto2; cps += 12; costAuto2 = Math.round(costAuto2 * 1.6); updateUI(); saveGame(); } });
-        upAuto3Btn.addEventListener('click', () => { if (balance >= costAuto3) { balance -= costAuto3; cps += 150; costAuto3 = Math.round(costAuto3 * 1.7); updateUI(); saveGame(); } });
+        upAuto2Btn.addEventListener('click', () => { if (balance >= costAuto2) { balance -= costAuto2; cps += 15; costAuto2 = Math.round(costAuto2 * 1.6); updateUI(); saveGame(); } });
+        upAuto3Btn.addEventListener('click', () => { if (balance >= costAuto3) { balance -= costAuto3; cps += 200; costAuto3 = Math.round(costAuto3 * 1.7); updateUI(); saveGame(); } });
 
+        // Механика Престижа (Перерождение)
+        prestigeBtn.addEventListener('click', () => {
+            if (confirm(`Вы уверены, что хотите продать компанию? Весь ваш текущий баланс и постройки обнулятся, но вы получите ${prestigeReward} Акций, которые сделают вас колоссально богаче!`)) {
+                shares += prestigeReward;
+                balance = 0; clickPower = 1; cps = 0;
+                costClick = 10; costAuto1 = 60; costAuto2 = 600; costAuto3 = 7000;
+                saveGame(); updateUI();
+            }
+        });
+
+        // Запуск мини-игры «Газоразведка» раз в 45 секунд
+        setInterval(() => {
+            const minerBox = document.getElementById('miner-box');
+            if (minerBox.style.display === "block") return;
+            
+            minerBox.style.display = "block";
+            pointerPos = 0; pointerDir = 4;
+            targetLeft = Math.floor(Math.random() * 260) + 20;
+            document.getElementById('target-zone').style.left = targetLeft + "px";
+
+            gameInterval = setInterval(() => {
+                pointerPos += pointerDir;
+                if (pointerPos >= 334 || pointerPos <= 0) pointerDir *= -1;
+                document.getElementById('pointer').style.left = pointerPos + "px";
+            }, 15);
+        }, 45000);
+
+        document.getElementById('drill-btn').addEventListener('click', () => {
+            clearInterval(gameInterval);
+            const minerBox = document.getElementById('miner-box');
+            minerBox.style.display = "none";
+
+            // Проверка попадания указателя в таргет зону (ширина зоны 40px)
+            if (pointerPos >= targetLeft && pointerPos <= (targetLeft + 40)) {
+                let reward = Math.round((cps * 40 + 200) * getMultiplier());
+                balance += reward;
+                alert(`🎉 Успех! Скважина обнаружена! Выкачано бонусных: +${reward} м³ газа!`);
+            } else {
+                alert("😢 Мимо! Бур наткнулся на пустую породу.");
+            }
+            updateUI();
+            saveGame();
+        });
+
+        // Случайные рыночные ИИ-события
         setInterval(() => {
             let rand = Math.random();
             eventBox.className = "event-box";
-            if (rand < 0.15) {
+            if (rand < 0.18) {
                 eventMultiplier = 2;
-                eventBox.textContent = "🚀 Бум спроса! Доход и клики УДВОЕНЫ на 12 сек!";
+                eventBox.textContent = "🚀 Инфляция валюты! Цены на энергоносители взлетели! Доход x2!";
                 eventBox.classList.add("event-active");
                 setTimeout(() => { eventMultiplier = 1; eventBox.textContent = "На рынке всё спокойно..."; eventBox.className = "event-box"; updateUI(); }, 12000);
-            } else if (rand > 0.88 && balance > 500) {
-                let loss = Math.round(balance * 0.1);
-                balance -= loss;
-                eventBox.textContent = `⚠️ Утечка на линии! Потеряно ${loss} м³ газа`;
+            } else if (rand > 0.85 && balance > 1000) {
+                let loss = Math.round(balance * 0.15); balance -= loss;
+                eventBox.textContent = `⚠️ Санкции на экспорт! Потеряно сырья: -${loss} м³`;
                 eventBox.classList.add("event-bad");
                 setTimeout(() => { eventBox.textContent = "На рынке всё спокойно..."; eventBox.className = "event-box"; }, 5000);
             }
             updateUI();
-        }, 30000);
+        }, 25000);
 
         function saveGame() {
-            localStorage.setItem('ge_balance', balance);
-            localStorage.setItem('ge_clickPower', clickPower);
-            localStorage.setItem('ge_cps', cps);
-            localStorage.setItem('ge_costClick', costClick);
-            localStorage.setItem('ge_costAuto1', costAuto1);
-            localStorage.setItem('ge_costAuto2', costAuto2);
-            localStorage.setItem('ge_costAuto3', costAuto3);
+            localStorage.setItem('g3_balance', balance);
+            localStorage.setItem('g3_clickPower', clickPower);
+            localStorage.setItem('g3_cps', cps);
+            localStorage.setItem('g3_shares', shares);
+            localStorage.setItem('g3_costClick', costClick);
+            localStorage.setItem('g3_costAuto1', costAuto1);
+            localStorage.setItem('g3_costAuto2', costAuto2);
+            localStorage.setItem('g3_costAuto3', costAuto3);
         }
 
-        setInterval(() => { if (cps > 0) { balance += (cps * eventMultiplier) / 10; updateUI(); } }, 100);
+        setInterval(() => { if (cps > 0) { balance += (cps * eventMultiplier * getMultiplier()) / 10; updateUI(); } }, 100);
         setInterval(saveGame, 5000);
-
-        document.getElementById('reset-btn').addEventListener('click', () => {
-            if(confirm("Обнулить всю газовую империю?")) { localStorage.clear(); location.reload(); }
-        });
+        document.getElementById('reset-btn').addEventListener('click', () => { if(confirm("Обнулить всю корпорацию навсегда?")) { localStorage.clear(); location.reload(); } });
 
         updateUI();
     </script>
