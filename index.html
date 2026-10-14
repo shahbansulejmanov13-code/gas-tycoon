@@ -1,22 +1,23 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Gas Tycoon</title><script src="https://yandex.ru"></script><style>
-body{margin:0;background:#03050d;color:#fff;font-family:sans-serif;overflow:hidden;user-select:none;}
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Gas Tycoon: Biomes</title><script src="https://yandex.ru"></script><style>
+body{margin:0;background:#03050d;color:#fff;font-family:sans-serif;overflow:hidden;user-select:none;transition:background 0.5s;}
 #gameCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 .ui{position:relative;z-index:10;pointer-events:none;padding:15px;display:flex;flex-direction:column;align-items:center;height:100vh;box-sizing:border-box;justify-content:space-between;}
-.board{background:rgba(5,10,28,0.9);padding:15px;border-radius:20px;border:1px solid #1e293b;backdrop-filter:blur(8px);pointer-events:auto;text-align:center;box-shadow:0 15px 40px rgba(0,0,0,0.6);width:90%;max-width:380px;}
-.money{font-size:28px;font-weight:900;color:#fbbf24;text-shadow:0 0 10px rgba(251,191,36,0.3);}
-.btn{pointer-events:auto;width:100%;padding:12px;background:linear-gradient(135deg,#00ffcc,#00b4db);color:#03050d;border:none;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 0 20px rgba(0,255,204,0.2);margin-top:10px;transition:transform 0.1s;}
-.btn:active{transform:scale(0.98);}
+.board{background:rgba(5,10,28,0.9);padding:12px;border-radius:20px;border:1px solid #1e293b;backdrop-filter:blur(8px);pointer-events:auto;text-align:center;box-shadow:0 15px 40px rgba(0,0,0,0.6);width:90%;max-width:380px;}
+.money{font-size:26px;font-weight:900;color:#fbbf24;text-shadow:0 0 10px rgba(251,191,36,0.3);}
+.btn{pointer-events:auto;width:100%;padding:12px;background:linear-gradient(135deg,var(--neon),#00b4db);color:#03050d;border:none;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 0 20px rgba(0,255,204,0.2);margin-top:8px;}
 .btn:disabled{background:#1e293b;color:#475569;cursor:not-allowed;box-shadow:none;}
-.shop{pointer-events:auto;background:rgba(5,10,28,0.9);padding:10px;border-radius:20px;border:1px solid #1e293b;display:flex;gap:8px;width:90%;max-width:380px;box-sizing:border-box;}
-.item{background:#090f24;border:1px solid #1e293b;padding:8px;border-radius:12px;text-align:center;flex:1;display:flex;flex-direction:column;justify-content:space-between;}
-.i-name{font-size:11px;font-weight:bold;color:#64748b;text-transform:uppercase;margin-bottom:4px;}
-.i-btn{background:#2563eb;color:#fff;border:none;padding:6px;border-radius:6px;font-size:11px;font-weight:bold;cursor:pointer;width:100%;}
+.shop{pointer-events:auto;background:rgba(5,10,28,0.9);padding:10px;border-radius:20px;border:1px solid #1e293b;display:flex;gap:6px;width:90%;max-width:380px;box-sizing:border-box;}
+.item{background:#090f24;border:1px solid #1e293b;padding:6px;border-radius:12px;text-align:center;flex:1;display:flex;flex-direction:column;justify-content:space-between;}
+.i-name{font-size:10px;font-weight:bold;color:#64748b;text-transform:uppercase;margin-bottom:4px;}
+.i-btn{background:#2563eb;color:#fff;border:none;padding:6px;border-radius:6px;font-size:10px;font-weight:bold;cursor:pointer;width:100%;}
 .i-btn:disabled{background:#1e293b;color:#475569;cursor:not-allowed;}
+.biome-badge{font-size:11px;font-weight:bold;color:var(--neon);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;text-shadow:0 0 10px var(--neon);}
 </style></head><body><canvas id="gameCanvas"></canvas><div class="ui">
     <div class="board">
+        <div class="biome-badge" id="biome-disp">Локация: Сибирь</div>
         <div class="money" id="m-disp">0 руб.</div>
-        <div style="font-size:16px;color:#38bdf8;font-weight:bold;margin:4px 0;" id="g-disp">В баках: 0.0 м³</div>
-        <div style="font-size:11px;color:#64748b;font-weight:bold;margin-bottom:5px;">КЛИК: +<span id="c-pow">1</span> | ПАССИВ: +<span id="pps">0</span> м³/с</div>
+        <div style="font-size:15px;color:#38bdf8;font-weight:bold;margin:2px 0;" id="g-disp">В баках: 0.0 м³</div>
+        <div style="font-size:10px;color:#64748b;font-weight:bold;margin-bottom:4px;">КЛИК: +<span id="c-pow">1</span> | ПАССИВ: +<span id="pps">0</span> м³/с</div>
         <button class="btn" id="btn-sell" disabled>💸 ХРАНИЛИЩЕ ПУСТО</button>
     </div>
     <div class="shop">
@@ -28,29 +29,53 @@ body{margin:0;background:#03050d;color:#fff;font-family:sans-serif;overflow:hidd
     let ysdkInstance = null; if (typeof YaGames!=='undefined'){YaGames.init().then(ysdk=>{ysdkInstance=ysdk;ysdk.adv.showFullscreenAdv({callbacks:{}});});}
     let money=Number(localStorage.getItem('gn_money'))||0, gas=Number(localStorage.getItem('gn_gas'))||0, clickPower=Number(localStorage.getItem('gn_clickPower'))||1, pps=Number(localStorage.getItem('gn_pps'))||0;
     let costClick=Number(localStorage.getItem('gn_cClick'))||15, costAuto1=Number(localStorage.getItem('gn_cAuto1'))||100, costAuto2=Number(localStorage.getItem('gn_cAuto2'))||850, marketPrice = 3.5;
-    const mDisp=document.getElementById('m-disp'),gDisp=document.getElementById('g-disp'),cPowEl=document.getElementById('c-pow'),ppsEl=document.getElementById('pps'),btnSell=document.getElementById('btn-sell'),bClick=document.getElementById('b-click'),bAuto1=document.getElementById('b-auto1'),bAuto2=document.getElementById('b-auto2');
+    const mDisp=document.getElementById('m-disp'),gDisp=document.getElementById('g-disp'),cPowEl=document.getElementById('c-pow'),ppsEl=document.getElementById('pps'),btnSell=document.getElementById('btn-sell'),bClick=document.getElementById('b-click'),bAuto1=document.getElementById('b-auto1'),bAuto2=document.getElementById('b-auto2'),biomeDisp=document.getElementById('biome-disp');
     
     const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getContext('2d');
     function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } window.addEventListener('resize', resize); resize();
 
     let ballRadius = 80; let targetRadius = 80; const particles = [];
-    
+
+    // База данных биомов (Разнообразие графики)
+    const biomes = [
+        { name: "Локация: Сибирь ❄️", neon: "#00ffcc", secondary: "#008866", bg: "#03050d", gridColor: "#0a1024" },
+        { name: "Локация: Шельф пустыни 🏜️", neon: "#ff9900", secondary: "#995500", bg: "#0d0803", gridColor: "#24140a" },
+        { name: "Локация: Кибер-Завод 🏭", neon: "#39ff14", secondary: "#22990d", bg: "#030d05", gridColor: "rgba(57,255,20,0.08)" },
+        { name: "Локация: Космос-Станция 🌌", neon: "#e0115f", secondary: "#7a0933", bg: "#0a030d", gridColor: "#220a3a" }
+    ];
+    let currentBiomeIdx = 0;
+
+    function selectBiome() {
+        // Локация меняется в зависимости от общего капитала и силы клика
+        let totalScore = money + (pps * 100);
+        if (totalScore < 300) currentBiomeIdx = 0;
+        else if (totalScore < 1500) currentBiomeIdx = 1;
+        else if (totalScore < 8000) currentBiomeIdx = 2;
+        else currentBiomeIdx = 3;
+        
+        let b = biomes[currentBiomeIdx];
+        document.documentElement.style.setProperty('--neon', b.neon);
+        biomeDisp.textContent = b.name;
+    }
+
     function spawnParticles(clickX, clickY) {
-        for(let i=0; i<25; i++) {
+        let b = biomes[currentBiomeIdx];
+        for(let i=0; i<20; i++) {
             particles.push({
                 x: clickX, y: clickY,
-                vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6 - 2,
-                size: Math.random() * 3 + 2, alpha: 1, color: Math.random() > 0.4 ? '#00ffcc' : '#38bdf8'
+                vx: (Math.random() - 0.5) * 7, vy: (Math.random() - 0.5) * 7 - 2,
+                size: Math.random() * 3 + 2, alpha: 1, color: Math.random() > 0.4 ? b.neon : '#ffffff'
             });
         }
     }
 
     function draw() {
-        ctx.fillStyle = '#03050d'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        let b = biomes[currentBiomeIdx];
+        ctx.fillStyle = b.bg; ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        ctx.strokeStyle = '#0a1024'; ctx.lineWidth = 1;
-        for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
-        for(let j=0; j<canvas.height; j+=40) { ctx.beginPath(); ctx.moveTo(0,j); ctx.lineTo(canvas.width,j); ctx.stroke(); }
+        ctx.strokeStyle = b.gridColor; ctx.lineWidth = 1;
+        for(let i=0; i<canvas.width; i+=45) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
+        for(let j=0; j<canvas.height; j+=45) { ctx.beginPath(); ctx.moveTo(0,j); ctx.lineTo(canvas.width,j); ctx.stroke(); }
 
         for(let i = particles.length - 1; i >= 0; i--) {
             let p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.alpha -= 0.02;
@@ -62,8 +87,8 @@ body{margin:0;background:#03050d;color:#fff;font-family:sans-serif;overflow:hidd
         ballRadius += (targetRadius - ballRadius) * 0.15;
         
         let cx = canvas.width / 2; let cy = canvas.height / 2;
-        ctx.save(); ctx.shadowBlur = 40; ctx.shadowColor = '#00ffcc';
-        let grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, ballRadius); grad.addColorStop(0, '#00ffcc'); grad.addColorStop(1, '#008866');
+        ctx.save(); ctx.shadowBlur = 40; ctx.shadowColor = b.neon;
+        let grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, ballRadius); grad.addColorStop(0, b.neon); grad.addColorStop(1, b.secondary);
         ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(cx, cy, ballRadius, 0, Math.PI*2); ctx.fill();
         ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 4; ctx.stroke(); ctx.restore();
         
@@ -82,12 +107,15 @@ body{margin:0;background:#03050d;color:#fff;font-family:sans-serif;overflow:hidd
     });
 
     function updateUI(){
+        selectBiome();
+        let b = biomes[currentBiomeIdx];
         mDisp.textContent=Math.floor(money).toLocaleString('ru-RU')+" руб."; gDisp.textContent="В баках: "+gas.toFixed(1)+" м³"; cPowEl.textContent=clickPower; ppsEl.textContent=pps;
         bClick.textContent=costClick+" р."; bAuto1.textContent=costAuto1+" р."; bAuto2.textContent=costAuto2+" р.";
         bClick.disabled=money<costClick; bAuto1.disabled=money<costAuto1; bAuto2.disabled=money<costAuto2; btnSell.disabled=gas <= 0;
+        btnSell.style.background = `linear-gradient(135deg, ${b.neon}, #00b4db)`;
         if(gas > 0) { btnSell.textContent = `💸 ПРОДАТЬ ЗА +${Math.floor(gas * marketPrice).toLocaleString('ru-RU')} РУБ.`; } else { btnSell.textContent = `💸 ХРАНИЛИЩЕ ПУСТО`; }
     }
-    btnSell.addEventListener('click',()=>{if(gas>0){money+=gas*3.5; gas=0; updateUI(); saveGame();}});
+    btnSell.addEventListener('click',()=>{if(gas>0){money+=gas*marketPrice; gas=0; updateUI(); saveGame();}});
     bClick.addEventListener('click',()=>{if(money>=costClick){money-=costClick; clickPower+=1; costClick=Math.round(costClick*1.5); updateUI(); saveGame();}});
     bAuto1.addEventListener('click',()=>{if(money>=costAuto1){money-=costAuto1; pps+=1; costAuto1=Math.round(costAuto1*1.6); updateUI(); saveGame();}});
     bAuto2.addEventListener('click',()=>{if(money>=costAuto2){money-=costAuto2; pps+=15; costAuto2=Math.round(costAuto2*1.6); updateUI(); saveGame();}});
