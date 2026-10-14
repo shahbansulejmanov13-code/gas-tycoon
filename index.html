@@ -3,175 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Газовый Магнат</title>
+    <title>Газовая Империя: Экономическая Стратегия</title>
     <style>
         body {
-            background-color: #1e1e24;
-            color: #ffffff;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #060814, #0b112c);
+            color: white;
             text-align: center;
-            padding-top: 50px;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
             user-select: none;
         }
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
-            background: #2a2a35;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-        }
-        h1 { color: #00d2ff; margin-bottom: 5px; }
-        .stat { font-size: 24px; margin: 15px 0; font-weight: bold; }
-        .sub-stat { font-size: 16px; color: #a0a0b0; margin-bottom: 25px; }
+        h1 { margin-bottom: 2px; color: #00ffcc; text-shadow: 0 0 15px rgba(0,255,204,0.4); font-size: 28px; }
+        .rank-badge { background: #1e293b; color: #38bdf8; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 15px; border: 1px solid #334155; }
+        .stats { margin: 10px 0; font-size: 14px; color: #9ca3af; }
         
-        /* Главная кнопка-вентиль */
-        #clickBtn {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            border: 5px solid #00d2ff;
-            background: radial-gradient(circle, #005f73 0%, #002233 100%);
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
-            transition: transform 0.05s, box-shadow 0.2s;
-            outline: none;
+        .score-container {
+            font-size: 32px;
+            margin-bottom: 20px;
+            background: rgba(0, 255, 204, 0.03);
+            padding: 12px 35px;
+            border-radius: 16px;
+            border: 1px solid rgba(0, 255, 204, 0.25);
+            font-weight: 900;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
         }
-        #clickBtn:active { transform: scale(0.95); }
-        #clickBtn:hover { box-shadow: 0 0 30px rgba(0, 210, 255, 0.8); }
 
-        /* Секция магазина */
-        .shop-box { margin-top: 40px; text-align: left; }
-        .upgrade-btn {
-            width: 100%;
-            background-color: #3a3a4c;
-            color: white;
-            border: 1px solid #555;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
+        .event-box {
+            width: 330px;
+            height: 45px;
+            margin-bottom: 15px;
+            padding: 8px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: bold;
             display: flex;
-            justify-content: space-between;
-            transition: background 0.2s;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed #374151;
+            transition: all 0.3s ease;
         }
-        .upgrade-btn:hover { background-color: #4a4a60; }
-        .upgrade-btn:disabled { background-color: #222; color: #666; cursor: not-allowed; border-color: #333; }
+        .event-active { background: rgba(234, 179, 8, 0.15); border: 1px solid #eab308; color: #fde047; text-shadow: 0 0 8px rgba(234,179,8,0.3); }
+        .event-bad { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; }
+
+        .click-area { position: relative; width: 180px; height: 180px; margin-bottom: 20px; }
+        #click-btn {
+            width: 100%; height: 100%; border-radius: 50%; border: 4px solid #00ffcc;
+            background: #111c3a; cursor: pointer; box-shadow: 0 0 35px rgba(0, 255, 204, 0.2);
+            transition: transform 0.05s, box-shadow 0.1s; display: flex; align-items: center; justify-content: center;
+        }
+        #click-btn:active { transform: scale(0.94); box-shadow: 0 0 20px rgba(0, 255, 204, 0.5); }
+        
+        .flame-icon {
+            width: 85px; height: 85px; background: #00ffcc;
+            clip-path: polygon(50% 0%, 80% 20%, 95% 50%, 85% 85%, 50% 100%, 15% 85%, 5% 50%, 20% 20%);
+            animation: pulse 1s infinite alternate; filter: drop-shadow(0 0 15px #00ffcc);
+        }
+        @keyframes pulse { 0% { transform: scale(0.93); opacity: 0.8; } 100% { transform: scale(1.03); opacity: 1; } }
+
+        .floating-text { position: absolute; color: #00ffcc; font-size: 24px; font-weight: bold; pointer-events: none; animation: floatUp 0.5s ease-out forwards; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, -50%) translateY(0); } 100% { opacity: 0; transform: translate(-50%, -50%) translateY(-80px); } }
+
+        .shop { background: rgba(15, 23, 42, 0.6); padding: 18px; border-radius: 16px; width: 340px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .shop h3 { margin-top: 0; color: #00ffcc; font-size: 16px; margin-bottom: 12px; }
+        .shop-btn {
+            width: 100%; padding: 12px; margin: 6px 0; border: none; border-radius: 8px;
+            background: linear-gradient(to right, #1e40af, #3b82f6); color: white; font-size: 13px;
+            font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between;
+        }
+        .shop-btn:hover { filter: brightness(1.15); }
+        .shop-btn:disabled { background: #1e293b; color: #64748b; cursor: not-allowed; filter: none; }
+        .reset-btn { margin-top: 25px; background: none; border: 1px solid #ef4444; color: #ef4444; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>ГАЗОВЫЙ МАГНАТ</h1>
-    <div class="stat">Баланс: <span id="money">0</span> ₽</div>
-    <div class="sub-stat">Пассивный доход: +<span id="pps">0</span> ₽/сек</div>
+    <h1>Газовая Империя</h1>
+    <div class="rank-badge" id="rank-val">Статус: Рабочий скважины</div>
+    
+    <div class="score-container">💨 <span id="balance">0</span> м³</div>
+    <div class="stats">Пассивный доход: <span id="cps-val">0</span> м³/с | За клик: +<span id="click-val">1</span> м³</div>
 
-    <!-- Большая круглая кнопка для кликов -->
-    <button id="clickBtn">ДОБЫТЬ ГАЗ</button>
+    <div class="event-box" id="event-box">На рынке всё спокойно...</div>
 
-    <div class="shop-box">
-        <h3>Улучшения производства:</h3>
-        
-        <!-- Апгрейд Клика -->
-        <button class="upgrade-btn" id="upgClick" onclick="buyClickUpgrade()">
-            <span>🔧 Мощный ключ (+1 к клику)</span>
-            <span id="costClick">Цена: 15 ₽</span>
-        </button>
-
-        <!-- Пассивный апгрейд 1 -->
-        <button class="upgrade-btn" id="upgDrill" onclick="buyDrill()">
-            <span>🚜 Газовая скважина (+1/сек)</span>
-            <span id="costDrill">Цена: 50 ₽</span>
-        </button>
-
-        <!-- Пассивный апгрейд 2 -->
-        <button class="upgrade-btn" id="upgPlant" onclick="buyPlant()">
-            <span>🏭 Завод СПГ (+10/сек)</span>
-            <span id="costPlant">Цена: 400 ₽</span>
-        </button>
+    <div class="click-area" id="click-area">
+        <button id="click-btn"><div class="flame-icon"></div></button>
     </div>
-</div>
 
-<script>
-    // 1. ИГРОВЫЕ ПЕРЕМЕННЫЕ
-    let game = {
-        money: 0,
-        clickPower: 1,
-        passiveIncome: 0,
+    <div class="shop">
+        <h3>Управление активами</h3>
+        <button id="up-click-btn" class="shop-btn"><span>🔧 Модернизация вентиля (+1)</span><span id="cost-click">10</span></button>
+        <button id="up-auto1-btn" class="shop-btn"><span>🚜 Буровая установка (+1/с)</span><span id="cost-auto1">60</span></button>
+        <button id="up-auto2-btn" class="shop-btn"><span>🏢 Магистральный провод (+12/с)</span><span id="cost-auto2">600</span></button>
+        <button id="up-auto3-btn" class="shop-btn"><span>🌐 Экспортный контракт (+150/с)</span><span id="cost-auto3">6500</span></button>
+    </div>
+
+    <button class="reset-btn" id="reset-btn">Сбросить активы</button>
+    <script {nonce}>
+        let balance = Number(localStorage.getItem('ge_balance')) || 0;
+        let clickPower = Number(localStorage.getItem('ge_clickPower')) || 1;
+        let cps = Number(localStorage.getItem('ge_cps')) || 0;
+
+        let costClick = Number(localStorage.getItem('ge_costClick')) || 10;
+        let costAuto1 = Number(localStorage.getItem('ge_costAuto1')) || 60;
+        let costAuto2 = Number(localStorage.getItem('ge_costAuto2')) || 600;
+        let costAuto3 = Number(localStorage.getItem('ge_costAuto3')) || 6500;
+
+        let eventMultiplier = 1;
+
+        const balanceEl = document.getElementById('balance');
+        const cpsEl = document.getElementById('cps-val');
+        const clickEl = document.getElementById('click-val');
+        const rankEl = document.getElementById('rank-val');
+        const eventBox = document.getElementById('event-box');
         
-        // Цены апгрейдов
-        costClick: 15,
-        costDrill: 50,
-        costPlant: 400
-    };
+        const clickBtn = document.getElementById('click-btn');
+        const clickArea = document.getElementById('click-area');
+        
+        const upClickBtn = document.getElementById('up-click-btn');
+        const upAuto1Btn = document.getElementById('up-auto1-btn');
+        const upAuto2Btn = document.getElementById('up-auto2-btn');
+        const upAuto3Btn = document.getElementById('up-auto3-btn');
+        
+        const costClickEl = document.getElementById('cost-click');
+        const costAuto1El = document.getElementById('cost-auto1');
+        const costAuto2El = document.getElementById('cost-auto2');
+        const costAuto3El = document.getElementById('cost-auto3');
 
-    // Ссылки на элементы экрана для быстрой работы
-    const moneyTxt = document.getElementById("money");
-    const ppsTxt = document.getElementById("pps");
-    const clickBtn = document.getElementById("clickBtn");
+        function updateUI() {
+            balanceEl.textContent = Math.floor(balance).toLocaleString('ru-RU');
+            cpsEl.textContent = (cps * eventMultiplier).toFixed(1);
+            clickEl.textContent = clickPower * eventMultiplier;
 
-    // 2. ЛОГИКА КЛИКА
-    clickBtn.addEventListener("click", () => {
-        game.money += game.clickPower;
+            costClickEl.textContent = costClick;
+            costAuto1El.textContent = costAuto1;
+            costAuto2El.textContent = costAuto2;
+            costAuto3El.textContent = costAuto3;
+            
+            upClickBtn.disabled = balance < costClick;
+            upAuto1Btn.disabled = balance < costAuto1;
+            upAuto2Btn.disabled = balance < costAuto2;
+            upAuto3Btn.disabled = balance < costAuto3;
+
+            updateRank();
+        }
+
+        function updateRank() {
+            if (balance < 1000) rankEl.textContent = "Статус: Рабочий скважины";
+            else if (balance < 25000) rankEl.textContent = "Статус: Мастер участка 🛠️";
+            else if (balance < 500000) rankEl.textContent = "Статус: Директор филиала 🏢";
+            else rankEl.textContent = "Статус: Газовый Магнат 👑";
+        }
+
+        clickBtn.addEventListener('click', () => {
+            let gained = clickPower * eventMultiplier;
+            balance += gained;
+            updateUI();
+            createFloatingText(gained);
+        });
+
+        function createFloatingText(amount) {
+            const text = document.createElement('div');
+            text.className = 'floating-text';
+            text.textContent = `+${amount}`;
+            text.style.left = `50%`;
+            text.style.top = `50%`;
+            clickArea.appendChild(text);
+            setTimeout(() => { text.remove(); }, 500);
+        }
+
+        upClickBtn.addEventListener('click', () => { if (balance >= costClick) { balance -= costClick; clickPower += 1; costClick = Math.round(costClick * 1.5); updateUI(); saveGame(); } });
+        upAuto1Btn.addEventListener('click', () => { if (balance >= costAuto1) { balance -= costAuto1; cps += 1; costAuto1 = Math.round(costAuto1 * 1.6); updateUI(); saveGame(); } });
+        upAuto2Btn.addEventListener('click', () => { if (balance >= costAuto2) { balance -= costAuto2; cps += 12; costAuto2 = Math.round(costAuto2 * 1.6); updateUI(); saveGame(); } });
+        upAuto3Btn.addEventListener('click', () => { if (balance >= costAuto3) { balance -= costAuto3; cps += 150; costAuto3 = Math.round(costAuto3 * 1.7); updateUI(); saveGame(); } });
+
+        setInterval(() => {
+            let rand = Math.random();
+            eventBox.className = "event-box";
+            if (rand < 0.15) {
+                eventMultiplier = 2;
+                eventBox.textContent = "🚀 Бум спроса! Доход и клики УДВОЕНЫ на 12 сек!";
+                eventBox.classList.add("event-active");
+                setTimeout(() => { eventMultiplier = 1; eventBox.textContent = "На рынке всё спокойно..."; eventBox.className = "event-box"; updateUI(); }, 12000);
+            } else if (rand > 0.88 && balance > 500) {
+                let loss = Math.round(balance * 0.1);
+                balance -= loss;
+                eventBox.textContent = `⚠️ Утечка на линии! Потеряно ${loss} м³ газа`;
+                eventBox.classList.add("event-bad");
+                setTimeout(() => { eventBox.textContent = "На рынке всё спокойно..."; eventBox.className = "event-box"; }, 5000);
+            }
+            updateUI();
+        }, 30000);
+
+        function saveGame() {
+            localStorage.setItem('ge_balance', balance);
+            localStorage.setItem('ge_clickPower', clickPower);
+            localStorage.setItem('ge_cps', cps);
+            localStorage.setItem('ge_costClick', costClick);
+            localStorage.setItem('ge_costAuto1', costAuto1);
+            localStorage.setItem('ge_costAuto2', costAuto2);
+            localStorage.setItem('ge_costAuto3', costAuto3);
+        }
+
+        setInterval(() => { if (cps > 0) { balance += (cps * eventMultiplier) / 10; updateUI(); } }, 100);
+        setInterval(saveGame, 5000);
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            if(confirm("Обнулить всю газовую империю?")) { localStorage.clear(); location.reload(); }
+        });
+
         updateUI();
-    });
-
-    // 3. ПОКУПКА АПГРЕЙДОВ
-    function buyClickUpgrade() {
-        if (game.money >= game.costClick) {
-            game.money -= game.costClick;
-            game.clickPower += 1;
-            game.costClick = Math.round(game.costClick * 1.5); // Цена растет на 50%
-            updateUI();
-        }
-    }
-
-    function buyDrill() {
-        if (game.money >= game.costDrill) {
-            game.money -= game.costDrill;
-            game.passiveIncome += 1;
-            game.costDrill = Math.round(game.costDrill * 1.4); // Цена растет на 40%
-            updateUI();
-        }
-    }
-
-    function buyPlant() {
-        if (game.money >= game.costPlant) {
-            game.money -= game.costPlant;
-            game.passiveIncome += 10;
-            game.costPlant = Math.round(game.costPlant * 1.4);
-            updateUI();
-        }
-    }
-
-    // 4. ТАЙМЕР ДЛЯ ПАССИВНОГО ДОХОДА (Срабатывает каждую секунду)
-    setInterval(() => {
-        game.money += game.passiveIncome;
-        updateUI();
-    }, 1000);
-
-    // 5. ОБНОВЛЕНИЕ ИНТЕРФЕЙСА И ДОСТУПНОСТИ КНОПОК
-    function updateUI() {
-        moneyTxt.innerText = game.money;
-        ppsTxt.innerText = game.passiveIncome;
-
-        document.getElementById("costClick").innerText = `Цена: ${game.costClick} ₽`;
-        document.getElementById("costDrill").innerText = `Цена: ${game.costDrill} ₽`;
-        document.getElementById("costPlant").innerText = `Цена: ${game.costPlant} ₽`;
-
-        // Включаем или выключаем кнопки в зависимости от баланса игрока
-        document.getElementById("upgClick").disabled = (game.money < game.costClick);
-        document.getElementById("upgDrill").disabled = (game.money < game.costDrill);
-        document.getElementById("upgPlant").disabled = (game.money < game.costPlant);
-    }
-
-    // Запуск проверки кнопок при старте игры
-    updateUI();
-</script>
-
+    </script>
 </body>
 </html>
