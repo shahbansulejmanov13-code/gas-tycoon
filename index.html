@@ -3,234 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Газовый Магнат: Симулятор ИИ</title>
+    <title>Газовый Магнат</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0b0f19, #111827);
-            color: white;
+            background-color: #1e1e24;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
             text-align: center;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
+            padding-top: 50px;
             user-select: none;
         }
-        h1 { margin-bottom: 5px; color: #00ffcc; text-shadow: 0 0 10px rgba(0,255,204,0.3); }
-        .stats { margin: 15px 0; font-size: 14px; color: #9ca3af; }
-        
-        .score-container {
-            font-size: 28px;
-            margin-bottom: 25px;
-            background: rgba(0, 255, 204, 0.05);
-            padding: 15px 30px;
-            border-radius: 12px;
-            border: 1px solid rgba(0, 255, 204, 0.2);
-            font-weight: bold;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-
-        /* Контейнер для клика с эффектом вылетающих цифр */
-        .click-area {
-            position: relative;
-            width: 200px;
-            height: 200px;
-            margin-bottom: 20px;
-        }
-
-        #click-btn {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 4px solid #00ffcc;
-            /* Временная ИИ-заглушка (пламя), пока вы не подставите свою картинку */
-            background: #1f2937 url('https://icons8.com') center/65% no-repeat;
-            cursor: pointer;
-            box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
-            transition: transform 0.05s, box-shadow 0.1s;
-        }
-        #click-btn:active {
-            transform: scale(0.95);
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.6);
-        }
-
-        /* Стили вылетающего текста кубометров */
-        .floating-text {
-            position: absolute;
-            color: #00ffcc;
-            font-size: 24px;
-            font-weight: bold;
-            pointer-events: none;
-            animation: floatUp 0.6s ease-out forwards;
-        }
-
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translate(-50%, -50%) translateY(0) scale(1); }
-            100% { opacity: 0; transform: translate(-50%, -50%) translateY(-100px) scale(0.8); }
-        }
-
-        .shop {
-            background: rgba(255, 255, 255, 0.02);
-            padding: 20px;
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #2a2a35;
+            padding: 30px;
             border-radius: 15px;
-            width: 350px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
-        .shop h3 { margin-top: 0; color: #00ffcc; }
-        .shop-btn {
-            width: 100%;
-            padding: 14px;
-            margin: 8px 0;
-            border: none;
-            border-radius: 8px;
-            background: linear-gradient(to right, #00b4db, #0083b0);
+        h1 { color: #00d2ff; margin-bottom: 5px; }
+        .stat { font-size: 24px; margin: 15px 0; font-weight: bold; }
+        .sub-stat { font-size: 16px; color: #a0a0b0; margin-bottom: 25px; }
+        
+        /* Главная кнопка-вентиль */
+        #clickBtn {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 5px solid #00d2ff;
+            background: radial-gradient(circle, #005f73 0%, #002233 100%);
             color: white;
-            font-size: 14px;
+            font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.2s;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+            transition: transform 0.05s, box-shadow 0.2s;
+            outline: none;
+        }
+        #clickBtn:active { transform: scale(0.95); }
+        #clickBtn:hover { box-shadow: 0 0 30px rgba(0, 210, 255, 0.8); }
+
+        /* Секция магазина */
+        .shop-box { margin-top: 40px; text-align: left; }
+        .upgrade-btn {
+            width: 100%;
+            background-color: #3a3a4c;
+            color: white;
+            border: 1px solid #555;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
             display: flex;
             justify-content: space-between;
+            transition: background 0.2s;
         }
-        .shop-btn:hover { filter: brightness(1.1); }
-        .shop-btn:disabled {
-            background: #1f2937;
-            color: #4b5563;
-            cursor: not-allowed;
-            filter: none;
-        }
-        .reset-btn {
-            margin-top: 30px;
-            background: none;
-            border: 1px solid #ef4444;
-            color: #ef4444;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .reset-btn:hover { background: #ef4444; color: white; }
+        .upgrade-btn:hover { background-color: #4a4a60; }
+        .upgrade-btn:disabled { background-color: #222; color: #666; cursor: not-allowed; border-color: #333; }
     </style>
 </head>
 <body>
 
-    <h1>Газовый Магнат</h1>
-    <div class="stats">Добыча: <span id="cps-val">0</span> м³/сек | За клик: +<span id="click-val">1</span> м³</div>
-    <div class="score-container">💨 <span id="balance">0</span> м³</div>
+<div class="container">
+    <h1>ГАЗОВЫЙ МАГНАТ</h1>
+    <div class="stat">Баланс: <span id="money">0</span> ₽</div>
+    <div class="sub-stat">Пассивный доход: +<span id="pps">0</span> ₽/сек</div>
 
-    <div class="click-area" id="click-area">
-        <button id="click-btn"></button>
+    <!-- Большая круглая кнопка для кликов -->
+    <button id="clickBtn">ДОБЫТЬ ГАЗ</button>
+
+    <div class="shop-box">
+        <h3>Улучшения производства:</h3>
+        
+        <!-- Апгрейд Клика -->
+        <button class="upgrade-btn" id="upgClick" onclick="buyClickUpgrade()">
+            <span>🔧 Мощный ключ (+1 к клику)</span>
+            <span id="costClick">Цена: 15 ₽</span>
+        </button>
+
+        <!-- Пассивный апгрейд 1 -->
+        <button class="upgrade-btn" id="upgDrill" onclick="buyDrill()">
+            <span>🚜 Газовая скважина (+1/сек)</span>
+            <span id="costDrill">Цена: 50 ₽</span>
+        </button>
+
+        <!-- Пассивный апгрейд 2 -->
+        <button class="upgrade-btn" id="upgPlant" onclick="buyPlant()">
+            <span>🏭 Завод СПГ (+10/сек)</span>
+            <span id="costPlant">Цена: 400 ₽</span>
+        </button>
     </div>
+</div>
 
-    <div class="shop">
-        <h3>Энергетические Апгрейды</h3>
-        <button id="up-click-btn" class="shop-btn"><span>Ручной насос (+1 к клику)</span><span id="cost-click">10</span></button>
-        <button id="up-auto1-btn" class="shop-btn"><span>Малая скважина (+1 м³/с)</span><span id="cost-auto1">50</span></button>
-        <button id="up-auto2-btn" class="shop-btn"><span>Газопровод в город (+10 м³/с)</span><span id="cost-auto2">500</span></button>
-        <button id="up-auto3-btn" class="shop-btn"><span>СПГ-Терминал (+100 м³/с)</span><span id="cost-auto3">5000</span></button>
-    </div>
-
-    <button class="reset-btn" id="reset-btn">Сбросить империю</button>
-
-    <script {nonce}>
-        let balance = Number(localStorage.getItem('gas_balance')) || 0;
-        let clickPower = Number(localStorage.getItem('gas_clickPower')) || 1;
-        let cps = Number(localStorage.getItem('gas_cps')) || 0;
-
-        let costClick = Number(localStorage.getItem('gas_costClick')) || 10;
-        let costAuto1 = Number(localStorage.getItem('gas_costAuto1')) || 50;
-        let costAuto2 = Number(localStorage.getItem('gas_costAuto2')) || 500;
-        let costAuto3 = Number(localStorage.getItem('gas_costAuto3')) || 5000;
-
-        const balanceEl = document.getElementById('balance');
-        const cpsEl = document.getElementById('cps-val');
-        const clickEl = document.getElementById('click-val');
+<script>
+    // 1. ИГРОВЫЕ ПЕРЕМЕННЫЕ
+    let game = {
+        money: 0,
+        clickPower: 1,
+        passiveIncome: 0,
         
-        const clickBtn = document.getElementById('click-btn');
-        const clickArea = document.getElementById('click-area');
-        
-        const upClickBtn = document.getElementById('up-click-btn');
-        const upAuto1Btn = document.getElementById('up-auto1-btn');
-        const upAuto2Btn = document.getElementById('up-auto2-btn');
-        const upAuto3Btn = document.getElementById('up-auto3-btn');
-        
-        const costClickEl = document.getElementById('cost-click');
-        const costAuto1El = document.getElementById('cost-auto1');
-        const costAuto2El = document.getElementById('cost-auto2');
-        const costAuto3El = document.getElementById('cost-auto3');
-        const resetBtn = document.getElementById('reset-btn');
+        // Цены апгрейдов
+        costClick: 15,
+        costDrill: 50,
+        costPlant: 400
+    };
 
-        function updateUI() {
-            balanceEl.textContent = Math.floor(balance);
-            cpsEl.textContent = cps;
-            clickEl.textContent = clickPower;
+    // Ссылки на элементы экрана для быстрой работы
+    const moneyTxt = document.getElementById("money");
+    const ppsTxt = document.getElementById("pps");
+    const clickBtn = document.getElementById("clickBtn");
 
-            costClickEl.textContent = costClick;
-            costAuto1El.textContent = costAuto1;
-            costAuto2El.textContent = costAuto2;
-            costAuto3El.textContent = costAuto3;
-            
-            upClickBtn.disabled = balance < costClick;
-            upAuto1Btn.disabled = balance < costAuto1;
-            upAuto2Btn.disabled = balance < costAuto2;
-            upAuto3Btn.disabled = balance < costAuto3;
-        }
-
-        // Клик и создание вылетающего текста
-        clickBtn.addEventListener('click', (e) => {
-            balance += clickPower;
-            updateUI();
-            createFloatingText(clickPower);
-        });
-
-        function createFloatingText(amount) {
-            const text = document.createElement('div');
-            text.className = 'floating-text';
-            text.textContent = `+${amount}`;
-            
-            // Позиционирование по центру кнопки со случайным небольшим сдвигом
-            text.style.left = `50%`;
-            text.style.top = `50%`;
-            
-            clickArea.appendChild(text);
-            
-            setTimeout(() => { text.remove(); }, 600);
-        }
-
-        // Логика покупки
-        upClickBtn.addEventListener('click', () => {
-            if (balance >= costClick) { balance -= costClick; clickPower += 1; costClick = Math.round(costClick * 1.5); updateUI(); saveGame(); }
-        });
-        upAuto1Btn.addEventListener('click', () => {
-            if (balance >= costAuto1) { balance -= costAuto1; cps += 1; costAuto1 = Math.round(costAuto1 * 1.6); updateUI(); saveGame(); }
-        });
-        upAuto2Btn.addEventListener('click', () => {
-            if (balance >= costAuto2) { balance -= costAuto2; cps += 10; costAuto2 = Math.round(costAuto2 * 1.6); updateUI(); saveGame(); }
-        });
-        upAuto3Btn.addEventListener('click', () => {
-            if (balance >= costAuto3) { balance -= costAuto3; cps += 100; costAuto3 = Math.round(costAuto3 * 1.7); updateUI(); saveGame(); }
-        });
-
-        function saveGame() {
-            localStorage.setItem('gas_balance', balance);
-            localStorage.setItem('gas_clickPower', clickPower);
-            localStorage.setItem('gas_cps', cps);
-            localStorage.setItem('gas_costClick', costClick);
-            localStorage.setItem('gas_costAuto1', costAuto1);
-            localStorage.setItem('gas_costAuto2', costAuto2);
-            localStorage.setItem('gas_costAuto3', costAuto3);
-        }
-
-        setInterval(() => { if (cps > 0) { balance += cps / 10; updateUI(); } }, 100);
-        setInterval(saveGame, 5000);
-
-        resetBtn.addEventListener('click', () => {
-            if(confirm("Обнулить всю газовую империю?")) { localStorage.clear(); location.reload(); }
-        });
-
+    // 2. ЛОГИКА КЛИКА
+    clickBtn.addEventListener("click", () => {
+        game.money += game.clickPower;
         updateUI();
-    </script>
+    });
+
+    // 3. ПОКУПКА АПГРЕЙДОВ
+    function buyClickUpgrade() {
+        if (game.money >= game.costClick) {
+            game.money -= game.costClick;
+            game.clickPower += 1;
+            game.costClick = Math.round(game.costClick * 1.5); // Цена растет на 50%
+            updateUI();
+        }
+    }
+
+    function buyDrill() {
+        if (game.money >= game.costDrill) {
+            game.money -= game.costDrill;
+            game.passiveIncome += 1;
+            game.costDrill = Math.round(game.costDrill * 1.4); // Цена растет на 40%
+            updateUI();
+        }
+    }
+
+    function buyPlant() {
+        if (game.money >= game.costPlant) {
+            game.money -= game.costPlant;
+            game.passiveIncome += 10;
+            game.costPlant = Math.round(game.costPlant * 1.4);
+            updateUI();
+        }
+    }
+
+    // 4. ТАЙМЕР ДЛЯ ПАССИВНОГО ДОХОДА (Срабатывает каждую секунду)
+    setInterval(() => {
+        game.money += game.passiveIncome;
+        updateUI();
+    }, 1000);
+
+    // 5. ОБНОВЛЕНИЕ ИНТЕРФЕЙСА И ДОСТУПНОСТИ КНОПОК
+    function updateUI() {
+        moneyTxt.innerText = game.money;
+        ppsTxt.innerText = game.passiveIncome;
+
+        document.getElementById("costClick").innerText = `Цена: ${game.costClick} ₽`;
+        document.getElementById("costDrill").innerText = `Цена: ${game.costDrill} ₽`;
+        document.getElementById("costPlant").innerText = `Цена: ${game.costPlant} ₽`;
+
+        // Включаем или выключаем кнопки в зависимости от баланса игрока
+        document.getElementById("upgClick").disabled = (game.money < game.costClick);
+        document.getElementById("upgDrill").disabled = (game.money < game.costDrill);
+        document.getElementById("upgPlant").disabled = (game.money < game.costPlant);
+    }
+
+    // Запуск проверки кнопок при старте игры
+    updateUI();
+</script>
+
 </body>
 </html>
