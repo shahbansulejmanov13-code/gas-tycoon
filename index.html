@@ -1,23 +1,23 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"><title>Gas Tycoon: Mobile Space</title><script src="https://yandex.ru"></script><style>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"><title>Gas Tycoon Mobile</title><script src="https://yandex.ru"></script><style>
 body{margin:0;background:#010205;color:#fff;font-family:sans-serif;overflow:hidden;user-select:none;touch-action:none;-webkit-user-select:none;}
 #gameCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
-.ui{position:relative;z-index:10;pointer-events:none;padding:12px;display:flex;flex-direction:column;align-items:center;height:100vh;box-sizing:border-box;justify-content:space-between;}
-.board{background:rgba(4,7,20,0.88);padding:12px;border-radius:20px;border:1px solid #1e293b;backdrop-filter:blur(10px);pointer-events:auto;text-align:center;box-shadow:0 15px 40px rgba(0,0,0,0.6);width:95%;max-width:380px;box-sizing:border-box;}
-.money{font-size:26px;font-weight:900;color:#fbbf24;text-shadow:0 0 10px rgba(251,191,36,0.3);}
-.btn{pointer-events:auto;width:100%;padding:12px;background:linear-gradient(135deg,var(--neon),#007799);color:#03050d;border:none;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 0 20px rgba(0,255,204,0.15);margin-top:8px;-webkit-tap-highlight-color:transparent;transition:transform 0.1s;}
+.ui{position:relative;z-index:10;pointer-events:none;padding:10px;display:flex;flex-direction:column;align-items:center;height:100vh;box-sizing:border-box;justify-content:space-between;}
+.board{background:rgba(4,7,20,0.88);padding:10px;border-radius:16px;border:1px solid #1e293b;backdrop-filter:blur(10px);pointer-events:auto;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.6);width:95%;max-width:360px;box-sizing:border-box;margin-top:env(safe-area-inset-top, 5px);}
+.money{font-size:24px;font-weight:900;color:#fbbf24;text-shadow:0 0 8px rgba(251,191,36,0.3);}
+.btn{pointer-events:auto;width:100%;padding:10px;background:linear-gradient(135deg,var(--neon),#007799);color:#03050d;border:none;border-radius:10px;font-size:12px;font-weight:900;cursor:pointer;box-shadow:0 0 15px rgba(0,255,204,0.15);margin-top:6px;-webkit-tap-highlight-color:transparent;transition:transform 0.1s;}
 .btn:active{transform:scale(0.98);}.btn:disabled{background:#1e293b;color:#475569;cursor:not-allowed;box-shadow:none;}
-.shop{pointer-events:auto;background:rgba(4,7,20,0.88);padding:8px;border-radius:20px;border:1px solid #1e293b;display:flex;gap:6px;width:95%;max-width:380px;box-sizing:border-box;margin-bottom:5px;}
-.item{background:#050a18;border:1px solid #1e293b;padding:6px;border-radius:12px;text-align:center;flex:1;display:flex;flex-direction:column;justify-content:space-between;}
-.i-name{font-size:10px;font-weight:bold;color:#64748b;text-transform:uppercase;margin-bottom:4px;}
-.i-btn{background:#2563eb;color:#fff;border:none;padding:8px 4px;border-radius:6px;font-size:10px;font-weight:bold;cursor:pointer;width:100%;-webkit-tap-highlight-color:transparent;}
+.shop{pointer-events:auto;background:rgba(4,7,20,0.88);padding:6px;border-radius:16px;border:1px solid #1e293b;display:flex;gap:4px;width:95%;max-width:360px;box-sizing:border-box;margin-bottom:env(safe-area-inset-bottom, 5px);}
+.item{background:#050a18;border:1px solid #1e293b;padding:5px;border-radius:10px;text-align:center;flex:1;display:flex;flex-direction:column;justify-content:space-between;}
+.i-name{font-size:9px;font-weight:bold;color:#64748b;text-transform:uppercase;margin-bottom:2px;}
+.i-btn{background:#2563eb;color:#fff;border:none;padding:6px 2px;border-radius:5px;font-size:9px;font-weight:bold;cursor:pointer;width:100%;-webkit-tap-highlight-color:transparent;}
 .i-btn:disabled{background:#1e293b;color:#475569;cursor:not-allowed;}
-.biome-badge{font-size:11px;font-weight:bold;color:var(--neon);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;}
+.biome-badge{font-size:10px;font-weight:bold;color:var(--neon);text-transform:uppercase;letter-spacing:1px;}
 </style></head><body><canvas id="gameCanvas"></canvas><div class="ui">
     <div class="board">
         <div class="biome-badge" id="biome-disp">Орбита Земли 🌍</div>
         <div class="money" id="m-disp">0 руб.</div>
-        <div style="font-size:15px;color:#38bdf8;font-weight:bold;margin:2px 0;" id="g-disp">В баках: 0.0 м³</div>
-        <div style="font-size:10px;color:#64748b;font-weight:bold;margin-bottom:4px;">КЛИК: +<span id="c-pow">1</span> | ПАССИВ: +<span id="pps">0</span> м³/с</div>
+        <div style="font-size:14px;color:#38bdf8;font-weight:bold;margin:1px 0;" id="g-disp">В баках: 0.0 м³</div>
+        <div style="font-size:9px;color:#64748b;font-weight:bold;margin-bottom:2px;">КЛИК: +<span id="c-pow">1</span> | ПАССИВ: +<span id="pps">0</span> м³/с</div>
         <button class="btn" id="btn-sell" disabled>💸 ХРАНИЛИЩЕ ПУСТО</button>
     </div>
     <div class="shop">
@@ -34,10 +34,10 @@ body{margin:0;background:#010205;color:#fff;font-family:sans-serif;overflow:hidd
     const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getContext('2d');
     function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } window.addEventListener('resize', resize); resize();
     
-    let ballRadius = 75; let targetRadius = 75; let glowTime = 0; const particles = []; const stars = []; const texts = [];
+    let ballRadius = 65; let targetRadius = 65; let glowTime = 0; const particles = []; const stars = []; const texts = [];
     let earthAngle = 0; let satelliteAngle = 0; let meteor = { x: -200, y: 0, vx: 0, vy: 0, active: false };
 
-    for(let i=0; i<120; i++) { stars.push({ x: Math.random()*2000, y: Math.random()*2000, size: Math.random()*1.5+0.3, alpha: Math.random(), speed: Math.random()*0.15+0.05 }); }
+    for(let i=0; i<100; i++) { stars.push({ x: Math.random()*2000, y: Math.random()*2000, size: Math.random()*1.2+0.3, alpha: Math.random(), speed: Math.random()*0.12+0.04 }); }
 
     const biomes = [
         { name: "Орбита Земли 🌍", neon: "#00ffcc", secondary: "#006655" },
@@ -53,17 +53,17 @@ body{margin:0;background:#010205;color:#fff;font-family:sans-serif;overflow:hidd
 
     function spawnParticles(cX, cY) {
         let b = biomes[currentBiomeIdx];
-        for(let i=0; i<15; i++) {
-            particles.push({ x: cX, y: cY, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5-2, size: Math.random()*3+1.5, alpha: 1, color: Math.random()>0.4?b.neon:'#38bdf8' });
+        for(let i=0; i<12; i++) {
+            particles.push({ x: cX, y: cY, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5-2, size: Math.random()*2.5+1.5, alpha: 1, color: Math.random()>0.4?b.neon:'#38bdf8' });
         }
-        texts.push({ x: cX + (Math.random()-0.5)*20, y: cY - 20, text: `+${clickPower}`, alpha: 1, vy: -2, color: b.neon });
+        texts.push({ x: cX + (Math.random()-0.5)*15, y: cY - 15, text: `+${clickPower}`, alpha: 1, vy: -1.8, color: b.neon });
     }
 
     function drawPlanet(x, y, r) {
         earthAngle += 0.001; satelliteAngle += 0.008; ctx.save();
-        ctx.strokeStyle = currentBiomeIdx === 0 ? 'rgba(0,136,255,0.15)' : 'rgba(255,68,0,0.15)'; ctx.lineWidth = r*0.2;
-        ctx.save(); ctx.translate(x, y); ctx.scale(2, 0.4); ctx.beginPath(); ctx.arc(0, 0, r*1.1, 0, Math.PI*2); ctx.stroke(); ctx.restore();
-        ctx.shadowBlur = 30; ctx.shadowColor = currentBiomeIdx === 0 ? '#0088ff' : (currentBiomeIdx === 1 ? '#ff4400' : '#8800ff');
+        ctx.strokeStyle = currentBiomeIdx === 0 ? 'rgba(0,136,255,0.12)' : 'rgba(255,68,0,0.12)'; ctx.lineWidth = r*0.18;
+        ctx.save(); ctx.translate(x, y); ctx.scale(2, 0.38); ctx.beginPath(); ctx.arc(0, 0, r*1.1, 0, Math.PI*2); ctx.stroke(); ctx.restore();
+        ctx.shadowBlur = 25; ctx.shadowColor = currentBiomeIdx === 0 ? '#0088ff' : (currentBiomeIdx === 1 ? '#ff4400' : '#8800ff');
         let planetGrad = ctx.createRadialGradient(x - r/3, y - r/3, 5, x, y, r);
         if(currentBiomeIdx === 0) { planetGrad.addColorStop(0, '#2b82c9'); planetGrad.addColorStop(1, '#051c38'); } 
         else if(currentBiomeIdx === 1) { planetGrad.addColorStop(0, '#cc4400'); planetGrad.addColorStop(1, '#330a00'); }
@@ -77,9 +77,9 @@ body{margin:0;background:#010205;color:#fff;font-family:sans-serif;overflow:hidd
         }
         let shadowGrad = ctx.createLinearGradient(x - r, y - r, x + r, y + r); shadowGrad.addColorStop(0, 'rgba(255,255,255,0.1)'); shadowGrad.addColorStop(0.5, 'rgba(0,0,0,0.4)'); shadowGrad.addColorStop(1, 'rgba(0,0,0,0.95)');
         ctx.fillStyle = shadowGrad; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); ctx.restore();
-        let satX = x + Math.cos(satelliteAngle) * (r * 1.4); let satY = y + Math.sin(satelliteAngle) * (r * 0.6);
-        ctx.save(); ctx.fillStyle = "#cbd5e1"; ctx.beginPath(); ctx.arc(satX, satY, 4, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = "#38bdf8"; ctx.fillRect(satX - 10, satY - 1, 5, 2); ctx.fillRect(satX + 5, satY - 1, 5, 2); ctx.restore();
+        let satX = x + Math.cos(satelliteAngle) * (r * 1.35); let satY = y + Math.sin(satelliteAngle) * (r * 0.55);
+        ctx.save(); ctx.fillStyle = "#cbd5e1"; ctx.beginPath(); ctx.arc(satX, satY, 3.5, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#38bdf8"; ctx.fillRect(satX - 8, satY - 1, 4, 2); ctx.fillRect(satX + 4, satY - 1, 4, 2); ctx.restore();
     }
     function draw() {
         let b = biomes[currentBiomeIdx]; glowTime += 0.03;
@@ -87,44 +87,44 @@ body{margin:0;background:#010205;color:#fff;font-family:sans-serif;overflow:hidd
         ctx.fillStyle = "#ffffff";
         for(let i=0; i<stars.length; i++) {
             let s = stars[i]; s.y += s.speed;
-            ctx.globalAlpha = s.alpha * (0.6 + Math.sin(glowTime + i)*0.4); 
-            ctx.fillRect(s.x % canvas.width, s.y % canvas.height, s.size, s.size);
+            ctx.globalAlpha = s.alpha * (0.6 + Math.sin(glowTime + i)*0.4); ctx.fillRect(s.x % canvas.width, s.y % canvas.height, s.size, s.size);
         }
         ctx.globalAlpha = 1;
         if(!meteor.active && Math.random() < 0.003) {
-            meteor.x = Math.random() * canvas.width; meteor.y = -50; meteor.vx = (Math.random()-0.3)*8+4; meteor.vy = Math.random()*6+5; meteor.active = true;
+            meteor.x = Math.random() * canvas.width; meteor.y = -50; meteor.vx = (Math.random()-0.3)*7+4; meteor.vy = Math.random()*5+5; meteor.active = true;
         }
         if(meteor.active) {
             meteor.x += meteor.vx; meteor.y += meteor.vy;
             let mGrad = ctx.createLinearGradient(meteor.x, meteor.y, meteor.x - meteor.vx*3, meteor.y - meteor.vy*3);
-            mGrad.addColorStop(0, '#ffffff'); mGrad.addColorStop(1, 'transparent'); ctx.strokeStyle = mGrad; ctx.lineWidth = 2;
+            mGrad.addColorStop(0, '#ffffff'); mGrad.addColorStop(1, 'transparent'); ctx.strokeStyle = mGrad; ctx.lineWidth = 1.5;
             ctx.beginPath(); ctx.moveTo(meteor.x, meteor.y); ctx.lineTo(meteor.x - meteor.vx*3, meteor.y - meteor.vy*3); ctx.stroke();
             if(meteor.y > canvas.height + 50) meteor.active = false;
         }
-        let planetSize = Math.min(canvas.width, canvas.height) * 0.20; drawPlanet(canvas.width * 0.25, canvas.height * 0.30, planetSize);
+        let planetSize = Math.min(canvas.width, canvas.height) * 0.16; drawPlanet(canvas.width * 0.5, canvas.height * 0.36, planetSize);
         for(let i = particles.length - 1; i >= 0; i--) {
             let p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.alpha -= 0.025;
             if(p.alpha <= 0) { particles.splice(i, 1); continue; }
-            ctx.save(); ctx.globalAlpha = p.alpha; ctx.shadowBlur = 6; ctx.shadowColor = p.color; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.restore();
+            ctx.save(); ctx.globalAlpha = p.alpha; ctx.shadowBlur = 5; ctx.shadowColor = p.color; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.restore();
         }
         for(let i = texts.length - 1; i >= 0; i--) {
             let t = texts[i]; t.y += t.vy; t.alpha -= 0.03;
             if(t.alpha <= 0) { texts.splice(i, 1); continue; }
-            ctx.save(); ctx.globalAlpha = t.alpha; ctx.font = "bold 20px sans-serif"; ctx.fillStyle = t.color; ctx.shadowBlur = 6; ctx.shadowColor = t.color; ctx.fillText(t.text, t.x, t.y); ctx.restore();
+            ctx.save(); ctx.globalAlpha = t.alpha; ctx.font = "bold 18px sans-serif"; ctx.fillStyle = t.color; ctx.shadowBlur = 5; ctx.shadowColor = t.color; ctx.fillText(t.text, t.x, t.y); ctx.restore();
         }
+        let idealRadius = Math.min(canvas.width, canvas.height) * 0.16; targetRadius = idealRadius < 55 ? 55 : (idealRadius > 75 ? 75 : idealRadius);
         ballRadius += (targetRadius - ballRadius) * 0.15;
-        let cx = canvas.width / 2; let cy = canvas.height / 2; let pulseRadius = ballRadius + Math.sin(glowTime) * 6;
-        ctx.save(); ctx.shadowBlur = 30 + Math.sin(glowTime)*15; ctx.shadowColor = b.neon;
+        let cx = canvas.width / 2; let cy = canvas.height / 2 + 35; let pulseRadius = ballRadius + Math.sin(glowTime) * 5;
+        ctx.save(); ctx.shadowBlur = 25 + Math.sin(glowTime)*10; ctx.shadowColor = b.neon;
         let grad = ctx.createRadialGradient(cx, cy, 5, cx, cy, pulseRadius); grad.addColorStop(0, b.neon); grad.addColorStop(1, b.secondary);
         ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(cx, cy, ballRadius, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 4; ctx.stroke(); ctx.restore();
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 3.5; ctx.stroke(); ctx.restore();
         requestAnimationFrame(draw);
     }
     function handleInput(clientX, clientY) {
-        let cx = canvas.width / 2; let cy = canvas.height / 2;
-        if(Math.hypot(clientX - cx, clientY - cy) <= ballRadius + 30) {
-            gas += clickPower; updateUI(); saveGame(); ballRadius = 55; spawnParticles(clientX, clientY);
-            if(navigator.vibrate) navigator.vibrate(25);
+        let cx = canvas.width / 2; let cy = canvas.height / 2 + 35;
+        if(Math.hypot(clientX - cx, clientY - cy) <= ballRadius + 25) {
+            gas += clickPower; updateUI(); saveGame(); ballRadius = targetRadius * 0.75; spawnParticles(clientX, clientY);
+            if(navigator.vibrate) navigator.vibrate(20);
         }
     }
     window.addEventListener('pointerdown', (e) => {
@@ -132,8 +132,7 @@ body{margin:0;background:#010205;color:#fff;font-family:sans-serif;overflow:hidd
         handleInput(e.clientX, e.clientY);
     });
     function updateUI(){
-        selectBiome(); let b = biomes[currentBiomeIdx];
-        mDisp.textContent=Math.floor(money).toLocaleString('ru-RU')+" руб."; gDisp.textContent="В баках: "+gas.toFixed(1)+" м³"; cPowEl.textContent=clickPower; ppsEl.textContent=pps;
+        selectBiome(); mDisp.textContent=Math.floor(money).toLocaleString('ru-RU')+" руб."; gDisp.textContent="В баках: "+gas.toFixed(1)+" м³"; cPowEl.textContent=clickPower; ppsEl.textContent=pps;
         bClick.textContent=costClick+" р."; bAuto1.textContent=costAuto1+" р."; bAuto2.textContent=costAuto2+" р.";
         bClick.disabled=money<costClick; bAuto1.disabled=money<costAuto1; bAuto2.disabled=money<costAuto2; btnSell.disabled=gas <= 0;
         if(gas > 0) { btnSell.textContent = `💸 ПРОДАТЬ ЗА +${Math.floor(gas * marketPrice).toLocaleString('ru-RU')} РУБ.`; } else { btnSell.textContent = `💸 ХРАНИЛИЩЕ ПУСТО`; }
