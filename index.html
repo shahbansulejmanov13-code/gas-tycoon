@@ -3,301 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Газовая Империя 3.0: Мировое Господство</title>
+    <title>Газовый Магнат: Симулятор Директора</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #020617, #0f172a);
-            color: white;
-            text-align: center;
-            margin: 0;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            user-select: none;
+            background: linear-gradient(135deg, #0f172a, #1e1b4b);
+            color: #f8fafc;
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; user-select: none;
         }
-        h1 { margin: 0 0 5px 0; color: #00ffcc; text-shadow: 0 0 15px rgba(0,255,204,0.4); font-size: 26px; }
+        .container { width: 100%; max-width: 450px; background: rgba(15, 23, 42, 0.8); border: 1px solid #334155; border-radius: 16px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { margin-top: 0; color: #38bdf8; font-size: 24px; text-shadow: 0 0 10px rgba(56,189,248,0.3); }
         
-        .header-panel { display: flex; gap: 10px; margin-bottom: 10px; }
-        .rank-badge { background: #1e293b; color: #38bdf8; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #334155; }
-        .prestige-badge { background: #1e1b4b; color: #a855f7; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #4338ca; }
-        
-        .score-container {
-            font-size: 36px; margin-bottom: 10px; background: rgba(0, 255, 204, 0.02);
-            padding: 10px 40px; border-radius: 16px; border: 1px solid rgba(0, 255, 204, 0.2);
-            font-weight: 900; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-        }
-        .stats { margin-bottom: 15px; font-size: 13px; color: #9ca3af; }
+        /* Панель ресурсов */
+        .resources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .res-card { background: #1e293b; border: 1px solid #475569; padding: 10px; border-radius: 10px; text-align: left; }
+        .res-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: bold; }
+        .res-value { font-size: 18px; font-weight: bold; color: #f1f5f9; margin-top: 2px; }
+        .cyan-text { color: #06b6d4; }
+        .amber-text { color: #f59e0b; }
 
-        /* Мини-игра Разведка */
-        .minigame-container {
-            width: 340px; background: #1e293b; border-radius: 12px; padding: 10px;
-            margin-bottom: 15px; border: 1px solid #475569; display: none;
+        /* Экран квестов и событий */
+        .log-box {
+            background: #0f172a; border: 1px solid #1e293b; border-radius: 12px;
+            padding: 15px; min-height: 120px; font-size: 14px; line-height: 1.5;
+            margin-bottom: 20px; text-align: left; border-left: 4px solid #38bdf8;
         }
-        .minigame-title { font-size: 12px; font-weight: bold; color: #fbbf24; margin-bottom: 5px; }
-        .bar-bg { width: 100%; height: 20px; background: #0f172a; border-radius: 10px; position: relative; overflow: hidden; }
-        .target-zone { width: 40px; height: 100%; background: #22c55e; position: absolute; left: 140px; box-shadow: 0 0 10px #22c55e; }
-        .slider-pointer { width: 6px; height: 100%; background: #ef4444; position: absolute; left: 0; }
-        .drill-btn { margin-top: 8px; width: 100%; padding: 6px; background: #fbbf24; color: black; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-        .event-box {
-            width: 330px; height: 40px; margin-bottom: 15px; padding: 5px; border-radius: 10px;
-            font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center;
-            background: rgba(255, 255, 255, 0.01); border: 1px dashed #374151; transition: all 0.3s;
+        /* Выборы в квестах */
+        .choices-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 25px; }
+        .choice-btn {
+            background: #334155; color: white; border: none; padding: 10px 15px;
+            border-radius: 8px; cursor: pointer; text-align: left; font-size: 13px;
+            transition: background 0.2s; border: 1px solid transparent;
         }
-        .event-active { background: rgba(234, 179, 8, 0.15); border: 1px solid #eab308; color: #fde047; }
-        .event-bad { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; }
+        .choice-btn:hover { background: #475569; border-color: #38bdf8; }
 
-        .click-area { position: relative; width: 160px; height: 160px; margin-bottom: 15px; }
-        #click-btn {
-            width: 100%; height: 100%; border-radius: 50%; border: 4px solid #00ffcc;
-            background: #0f172a; cursor: pointer; box-shadow: 0 0 30px rgba(0, 255, 204, 0.15);
-            transition: transform 0.05s; display: flex; align-items: center; justify-content: center;
-        }
-        #click-btn:active { transform: scale(0.95); }
-        .flame-icon {
-            width: 75px; height: 75px; background: #00ffcc;
-            clip-path: polygon(50% 0%, 85% 25%, 100% 55%, 80% 90%, 50% 100%, 20% 90%, 0% 55%, 15% 25%);
-            animation: pulse 0.8s infinite alternate; filter: drop-shadow(0 0 15px #00ffcc);
-        }
-        @keyframes pulse { 0% { transform: scale(0.95); } 100% { transform: scale(1.05); } }
+        /* Панель управления (Инвестиции) */
+        .management-panel { background: rgba(30, 41, 59, 0.5); border-radius: 12px; padding: 15px; text-align: left; }
+        .management-panel h3 { margin-top: 0; font-size: 14px; color: #94a3b8; border-bottom: 1px solid #334155; padding-bottom: 5px; }
+        .manage-row { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; font-size: 13px; }
+        .action-btn { background: #0284c7; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .action-btn:disabled { background: #334155; color: #64748b; cursor: not-allowed; }
 
-        .floating-text { position: absolute; color: #00ffcc; font-size: 22px; font-weight: bold; pointer-events: none; animation: floatUp 0.4s ease-out forwards; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, -50%) translateY(0); } 100% { opacity: 0; transform: translate(-50%, -50%) translateY(-70px); } }
-
-        .shop { background: rgba(15, 23, 42, 0.8); padding: 15px; border-radius: 16px; width: 340px; border: 1px solid rgba(255, 255, 255, 0.05); }
-        .shop h3 { margin: 0 0 10px 0; color: #00ffcc; font-size: 15px; }
-        .shop-btn {
-            width: 100%; padding: 10px; margin: 5px 0; border: none; border-radius: 8px;
-            background: linear-gradient(to right, #1d4ed8, #2563eb); color: white; font-size: 12px;
-            font-weight: bold; cursor: pointer; display: flex; justify-content: space-between;
+        /* Кнопка Следующего Хода */
+        .next-turn-btn {
+            width: 100%; padding: 14px; background: linear-gradient(to right, #0ea5e9, #2563eb);
+            color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold;
+            cursor: pointer; margin-top: 20px; box-shadow: 0 4px 15px rgba(14,165,233,0.3);
         }
-        .shop-btn:disabled { background: #1e293b; color: #475569; cursor: not-allowed; }
-        
-        .prestige-section { margin-top: 15px; width: 340px; }
-        .prestige-btn { width: 100%; padding: 10px; background: linear-gradient(to right, #6b21a8, #7c3aed); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 12px; }
-        .prestige-btn:disabled { background: #334155; color: #64748b; cursor: not-allowed; }
-        .reset-btn { margin-top: 15px; background: none; border: 1px solid #ef4444; color: #ef4444; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; }
+        .next-turn-btn:hover { filter: brightness(1.1); }
     </style>
 </head>
 <body>
 
-    <h1>Газовая Империя 3.0</h1>
-    <div class="header-panel">
-        <div class="rank-badge" id="rank-val">Ранг: Рабочий</div>
-        <div class="prestige-badge" id="shares-val">Акции: 0 (+0% дохода)</div>
-    </div>
-    
-    <div class="score-container">💨 <span id="balance">0</span> м³</div>
-    <div class="stats">Доход: <span id="cps-val">0</span> м³/с | Клик: +<span id="click-val">1</span></div>
-
-    <!-- Интерактивная Мини-игра Газоразведка -->
-    <div class="minigame-container" id="miner-box">
-        <div class="minigame-title">⛏️ ГАЗОРАЗВЕДКА: Попади в зеленую зону!</div>
-        <div class="bar-bg">
-            <div class="target-zone" id="target-zone"></div>
-            <div class="slider-pointer" id="pointer"></div>
+    <div class="container">
+        <h1>Газовый Магнат: Управление</h1>
+        
+        <!-- Баланс и Активы -->
+        <div class="resources-grid">
+            <div class="res-card">
+                <div class="res-label">💰 Бюджет компании</div>
+                <div class="res-value amber-text"><span id="money-val">100 000</span> ₽</div>
+            </div>
+            <div class="res-card">
+                <div class="res-label">💨 Добыча газа / мес</div>
+                <div class="res-value cyan-text"><span id="gas-val">0</span> м³</div>
+            </div>
+            <div class="res-card">
+                <div class="res-label">🚜 Буровые вышки</div>
+                <div class="res-value"><span id="rigs-val">1</span> шт.</div>
+            </div>
+            <div class="res-card">
+                <div class="res-label">👥 Рабочие (Зарплата)</div>
+                <div class="res-value"><span id="staff-val">5</span> чел.</div>
+            </div>
         </div>
-        <button class="drill-btn" id="drill-btn">БУРИТЬ!</button>
+
+        <!-- Текстовое ИИ-событие месяца -->
+        <div class="log-box" id="event-text">
+            Добро пожаловать на пост Генерального директора! Ваша цель — удержать компанию от банкротства, развивать инфраструктуру и принимать стратегические решения. Нажмите "Следующий месяц", чтобы начать первый квартал.
+        </div>
+
+        <!-- Варианты решения ситуации -->
+        <div class="choices-container" id="choices-box" style="display: none;">
+            <button class="choice-btn" onclick="makeChoice(1)">Вариант 1</button>
+            <button class="choice-btn" onclick="makeChoice(2)">Вариант 2</button>
+        </div>
+
+        <!-- Покупки и Расширение -->
+        <div class="management-panel">
+            <h3>📈 Стратегическое расширение</h3>
+            <div class="manage-row">
+                <span>Купить буровую вышку (Цена: 40 000 ₽)</span>
+                <button class="action-btn" id="buy-rig-btn">Построить</button>
+            </div>
+            <div class="manage-row">
+                <span>Нанять буровую бригаду (Цена: 15 000 ₽)</span>
+                <button class="action-btn" id="buy-staff-btn">Нанять</button>
+            </div>
+        </div>
+
+        <!-- Главный двигатель геймплея -->
+        <button class="next-turn-btn" id="next-turn-btn">СЛЕДУЮЩИЙ МЕСЯЦ (Ход)</button>
     </div>
-
-    <div class="event-box" id="event-box">На рынке всё спокойно...</div>
-
-    <div class="click-area" id="click-area">
-        <button id="click-btn"><div class="flame-icon"></div></button>
-    </div>
-
-    <div class="shop">
-        <h3>Управление корпорацией</h3>
-        <button id="up-click-btn" class="shop-btn"><span>🔧 Новые технологии клика</span><span id="cost-click">10</span></button>
-        <button id="up-auto1-btn" class="shop-btn"><span>🚜 Газовая вышка (+1/с)</span><span id="cost-auto1">60</span></button>
-        <button id="up-auto2-btn" class="shop-btn"><span>🏢 Газопровод «Сибирь» (+15/с)</span><span id="cost-auto2">600</span></button>
-        <button id="up-auto3-btn" class="shop-btn"><span>🌐 Мировой терминал (+200/с)</span><span id="cost-auto3">7000</span></button>
-    </div>
-
-    <div class="prestige-section">
-        <button id="prestige-btn" class="prestige-btn">Продать компанию за корпоративные Акции (Нужно: 100k м³)</button>
-    </div>
-
-    <button class="reset-btn" id="reset-btn">Сбросить все сохранения</button>
     <script {nonce}>
-        let balance = Number(localStorage.getItem('g3_balance')) || 0;
-        let clickPower = Number(localStorage.getItem('g3_clickPower')) || 1;
-        let cps = Number(localStorage.getItem('g3_cps')) || 0;
-        let shares = Number(localStorage.getItem('g3_shares')) || 0;
+        // Игровые переменные
+        let money = 100000;
+        let rigs = 1;
+        let staff = 5;
+        let gasProduction = 0;
+        let currentMonth = 0;
+        let activeEvent = null;
 
-        let costClick = Number(localStorage.getItem('g3_costClick')) || 10;
-        let costAuto1 = Number(localStorage.getItem('g3_costAuto1')) || 60;
-        let costAuto2 = Number(localStorage.getItem('g3_costAuto2')) || 600;
-        let costAuto3 = Number(localStorage.getItem('g3_costAuto3')) || 7000;
+        // Базы данных ИИ-событий (Квестов)
+        const gameEvents = [
+            {
+                title: "🌋 Прорыв подземных вод!",
+                text: "На вышке №1 началось затопление скважины. Инженеры требуют денег на экстренную герметизацию, иначе добыча упадет.",
+                choices: [
+                    { text: "Выделить 30 000 ₽ на ремонт (Безопасно)", moneyEffect: -30000, rigEffect: 0, textResult: "Вы успешно устранили аварию. Добыча в норме!" },
+                    { text: "Игнорировать угрозу (Риск)", moneyEffect: 0, rigEffect: -1, textResult: "Экономия вышла боком: скважину затопило, одна вышка разрушена." }
+                ]
+            },
+            {
+                title: "🇪🇺 Запрос на экспорт",
+                text: "Крупный зарубежный холдинг предлагает заключить контракт. Но они требуют провести дорогую экологическую экспертизу ваших объектов.",
+                choices: [
+                    { text: "Оплатить экспертизу за 50 000 ₽", moneyEffect: -50000, bonusIncome: 90000, textResult: "Экспертиза пройдена! Контракт подписан, вы получили огромную прибыль!" },
+                    { text: "Отказаться от сделки", moneyEffect: 0, bonusIncome: 0, textResult: "Вы решили работать только на внутреннем рынке. Стабильно, но без сверхприбыли." }
+                ]
+            },
+            {
+                title: "👥 Забастовка рабочих",
+                text: "Ваши бурильщики недовольны условиями труда и старым оборудованием. Они требуют выплатить им разовые премии.",
+                choices: [
+                    { text: "Выдать премии (20 000 ₽)", moneyEffect: -20000, textResult: "Рабочие довольны и вернулись к бурению с удвоенной силой." },
+                    { text: "Пригрозить увольнениями", moneyEffect: 0, bonusIncome: -30000, textResult: "Бригада саботировала работу. В этом месяце добыча упала, компания понесла убытки." }
+                ]
+            }
+        ];
 
-        let eventMultiplier = 1;
-        let prestigeReward = 0;
+        const moneyEl = document.getElementById('money-val');
+        const gasEl = document.getElementById('gas-val');
+        const rigsEl = document.getElementById('rigs-val');
+        const staffEl = document.getElementById('staff-val');
+        const eventTextEl = document.getElementById('event-text');
+        const choicesBox = document.getElementById('choices-box');
+        const nextTurnBtn = document.getElementById('next-turn-btn');
 
-        // Элементы мини-игры
-        let pointerPos = 0;
-        let pointerDir = 1;
-        let gameInterval = null;
-        let targetLeft = 140;
-
-        const balanceEl = document.getElementById('balance');
-        const cpsEl = document.getElementById('cps-val');
-        const clickEl = document.getElementById('click-val');
-        const rankEl = document.getElementById('rank-val');
-        const sharesEl = document.getElementById('shares-val');
-        const eventBox = document.getElementById('event-box');
-        const prestigeBtn = document.getElementById('prestige-btn');
-        
-        // Переменные элементов кнопок
-        const clickBtn = document.getElementById('click-btn');
-        const clickArea = document.getElementById('click-area');
-        const upClickBtn = document.getElementById('up-click-btn');
-        const upAuto1Btn = document.getElementById('up-auto1-btn');
-        const upAuto2Btn = document.getElementById('up-auto2-btn');
-        const upAuto3Btn = document.getElementById('up-auto3-btn');
-        
-        const costClickEl = document.getElementById('cost-click');
-        const costAuto1El = document.getElementById('cost-auto1');
-        const costAuto2El = document.getElementById('cost-auto2');
-        const costAuto3El = document.getElementById('cost-auto3');
-
-        function getMultiplier() { return 1 + (shares * 0.5); }
+        const buyRigBtn = document.getElementById('buy-rig-btn');
+        const buyStaffBtn = document.getElementById('buy-staff-btn');
 
         function updateUI() {
-            let totalMultiplier = eventMultiplier * getMultiplier();
-            balanceEl.textContent = Math.floor(balance).toLocaleString('ru-RU');
-            cpsEl.textContent = (cps * totalMultiplier).toFixed(1);
-            clickEl.textContent = Math.round(clickPower * totalMultiplier);
-            sharesEl.textContent = `Акции: ${shares} (+${shares * 50}% дохода)`;
-
-            costClickEl.textContent = costClick;
-            costAuto1El.textContent = costAuto1;
-            costAuto2El.textContent = costAuto2;
-            costAuto3El.textContent = costAuto3;
+            gasProduction = rigs * staff * 500; // Формула добычи
             
-            upClickBtn.disabled = balance < costClick;
-            upAuto1Btn.disabled = balance < costAuto1;
-            upAuto2Btn.disabled = balance < costAuto2;
-            upAuto3Btn.disabled = balance < costAuto3;
+            moneyEl.textContent = money.toLocaleString('ru-RU');
+            gasEl.textContent = gasProduction.toLocaleString('ru-RU');
+            rigsEl.textContent = rigs;
+            staffEl.textContent = staff;
 
-            // Расчет престижа
-            if (balance >= 100000) {
-                prestigeReward = Math.floor(Math.sqrt(balance / 100000));
-                prestigeBtn.disabled = false;
-                prestigeBtn.textContent = `🏢 Выйти на IPO! Получить Акции: +${prestigeReward}`;
-            } else {
-                prestigeBtn.disabled = true;
-                prestigeBtn.textContent = `🏢 Выйти на IPO (Нужно накопительно: 100 000 м³)` ;
+            buyRigBtn.disabled = money < 40000;
+            buyStaffBtn.disabled = money < 15000;
+
+            // Проверка проигрыша
+            if (money <= 0) {
+                eventTextEl.textContent = "🚨 БАНКРОТСТВО! Ваша газовая компания полностью истощила бюджет. Государство отозвало лицензию. Игра окончена.";
+                nextTurnBtn.disabled = true;
+                choicesBox.style.display = "none";
             }
-            updateRank();
         }
 
-        function updateRank() {
-            if (balance < 5000) rankEl.textContent = "Ранг: Начинающий бурильщик 🚜";
-            else if (balance < 50000) rankEl.textContent = "Ранг: Энергетический Поставщик ⚡";
-            else if (balance < 1000000) rankEl.textContent = "Ранг: Глава Газпрома 🏢";
-            else rankEl.textContent = "Ранг: Властелин Мирового Рынка 👑";
-        }
+        // Покупка улучшений
+        buyRigBtn.addEventListener('click', () => { if (money >= 40000) { money -= 40000; rigs++; updateUI(); } });
+        buyStaffBtn.addEventListener('click', () => { if (money >= 15000) { money -= 15000; staff += 3; updateUI(); } });
 
-        clickBtn.addEventListener('click', () => {
-            let gained = Math.round(clickPower * eventMultiplier * getMultiplier());
-            balance += gained;
-            updateUI();
-            createFloatingText(gained);
-        });
-
-        function createFloatingText(amount) {
-            const text = document.createElement('div');
-            text.className = 'floating-text';
-            text.textContent = `+${amount}`;
-            text.style.left = `50%`; text.style.top = `50%`;
-            clickArea.appendChild(text);
-            setTimeout(() => text.remove(), 400);
-        }
-
-        upClickBtn.addEventListener('click', () => { if (balance >= costClick) { balance -= costClick; clickPower += 1; costClick = Math.round(costClick * 1.5); updateUI(); saveGame(); } });
-        upAuto1Btn.addEventListener('click', () => { if (balance >= costAuto1) { balance -= costAuto1; cps += 1; costAuto1 = Math.round(costAuto1 * 1.6); updateUI(); saveGame(); } });
-        upAuto2Btn.addEventListener('click', () => { if (balance >= costAuto2) { balance -= costAuto2; cps += 15; costAuto2 = Math.round(costAuto2 * 1.6); updateUI(); saveGame(); } });
-        upAuto3Btn.addEventListener('click', () => { if (balance >= costAuto3) { balance -= costAuto3; cps += 200; costAuto3 = Math.round(costAuto3 * 1.7); updateUI(); saveGame(); } });
-
-        // Механика Престижа (Перерождение)
-        prestigeBtn.addEventListener('click', () => {
-            if (confirm(`Вы уверены, что хотите продать компанию? Весь ваш текущий баланс и постройки обнулятся, но вы получите ${prestigeReward} Акций, которые сделают вас колоссально богаче!`)) {
-                shares += prestigeReward;
-                balance = 0; clickPower = 1; cps = 0;
-                costClick = 10; costAuto1 = 60; costAuto2 = 600; costAuto3 = 7000;
-                saveGame(); updateUI();
-            }
-        });
-
-        // Запуск мини-игры «Газоразведка» раз в 45 секунд
-        setInterval(() => {
-            const minerBox = document.getElementById('miner-box');
-            if (minerBox.style.display === "block") return;
+        // Логика смены месяца (Ход)
+        nextTurnBtn.addEventListener('click', () => {
+            currentMonth++;
             
-            minerBox.style.display = "block";
-            pointerPos = 0; pointerDir = 4;
-            targetLeft = Math.floor(Math.random() * 260) + 20;
-            document.getElementById('target-zone').style.left = targetLeft + "px";
+            // 1. Считаем базовый доход и расходы
+            let gasIncome = gasProduction * 2.5; // Цена газа за м3
+            let expenses = staff * 2000; // Зарплата рабочих
+            money += Math.round(gasIncome - expenses);
 
-            gameInterval = setInterval(() => {
-                pointerPos += pointerDir;
-                if (pointerPos >= 334 || pointerPos <= 0) pointerDir *= -1;
-                document.getElementById('pointer').style.left = pointerPos + "px";
-            }, 15);
-        }, 45000);
-
-        document.getElementById('drill-btn').addEventListener('click', () => {
-            clearInterval(gameInterval);
-            const minerBox = document.getElementById('miner-box');
-            minerBox.style.display = "none";
-
-            // Проверка попадания указателя в таргет зону (ширина зоны 40px)
-            if (pointerPos >= targetLeft && pointerPos <= (targetLeft + 40)) {
-                let reward = Math.round((cps * 40 + 200) * getMultiplier());
-                balance += reward;
-                alert(`🎉 Успех! Скважина обнаружена! Выкачано бонусных: +${reward} м³ газа!`);
+            // 2. Запускаем случайное текстовое событие
+            if (Math.random() < 0.7 && gameEvents.length > currentMonth % gameEvents.length) {
+                activeEvent = gameEvents[currentMonth % gameEvents.length];
+                showEvent(activeEvent);
             } else {
-                alert("😢 Мимо! Бур наткнулся на пустую породу.");
+                activeEvent = null;
+                choicesBox.style.display = "none";
+                eventTextEl.textContent = `📊 Месяц ${currentMonth} завершен. Чистая прибыль от продажи газа составила +${Math.round(gasIncome - expenses).toLocaleString('ru-RU')} ₽. На рынке всё спокойно.`;
+                updateUI();
             }
-            updateUI();
-            saveGame();
         });
 
-        // Случайные рыночные ИИ-события
-        setInterval(() => {
-            let rand = Math.random();
-            eventBox.className = "event-box";
-            if (rand < 0.18) {
-                eventMultiplier = 2;
-                eventBox.textContent = "🚀 Инфляция валюты! Цены на энергоносители взлетели! Доход x2!";
-                eventBox.classList.add("event-active");
-                setTimeout(() => { eventMultiplier = 1; eventBox.textContent = "На рынке всё спокойно..."; eventBox.className = "event-box"; updateUI(); }, 12000);
-            } else if (rand > 0.85 && balance > 1000) {
-                let loss = Math.round(balance * 0.15); balance -= loss;
-                eventBox.textContent = `⚠️ Санкции на экспорт! Потеряно сырья: -${loss} м³`;
-                eventBox.classList.add("event-bad");
-                setTimeout(() => { eventBox.textContent = "На рынке всё спокойно..."; eventBox.className = "event-box"; }, 5000);
-            }
+        function showEvent(evt) {
+            nextTurnBtn.style.display = "none"; // Прячем кнопку хода, пока нет выбора
+            choicesBox.style.display = "flex";
+            eventTextEl.innerHTML = `<strong>${evt.title}</strong><br><br>${evt.text}`;
+            
+            // Настраиваем кнопки выбора
+            const buttons = choicesBox.getElementsByClassName('choice-btn');
+            buttons[0].textContent = evt.choices[0].text;
+            buttons[1].textContent = evt.choices[1].text;
             updateUI();
-        }, 25000);
-
-        function saveGame() {
-            localStorage.setItem('g3_balance', balance);
-            localStorage.setItem('g3_clickPower', clickPower);
-            localStorage.setItem('g3_cps', cps);
-            localStorage.setItem('g3_shares', shares);
-            localStorage.setItem('g3_costClick', costClick);
-            localStorage.setItem('g3_costAuto1', costAuto1);
-            localStorage.setItem('g3_costAuto2', costAuto2);
-            localStorage.setItem('g3_costAuto3', costAuto3);
         }
 
-        setInterval(() => { if (cps > 0) { balance += (cps * eventMultiplier * getMultiplier()) / 10; updateUI(); } }, 100);
-        setInterval(saveGame, 5000);
-        document.getElementById('reset-btn').addEventListener('click', () => { if(confirm("Обнулить всю корпорацию навсегда?")) { localStorage.clear(); location.reload(); } });
+        function makeChoice(index) {
+            if (!activeEvent) return;
+            const choice = activeEvent.choices[index - 1];
+
+            // Применяем эффекты решения
+            money += choice.moneyEffect || 0;
+            if (choice.bonusIncome) money += choice.bonusIncome;
+            if (choice.rigEffect) rigs += choice.rigEffect;
+            if (rigs < 0) rigs = 0;
+
+            // Выводим результат выбора
+            eventTextEl.textContent = choice.textResult;
+            
+            choicesBox.style.display = "none";
+            nextTurnBtn.style.display = "block"; // Возвращаем ход
+            updateUI();
+        }
 
         updateUI();
     </script>
