@@ -1,6 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"><title>Gas Tycoon Max</title><script src="https://cloudflare.com"></script><script src="https://crazygames.com"></script><style>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"><title>Gas Tycoon Max</title><script src="https://cloudflare.com"></script><script src="https://crazygames.com"></script><style>
 body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-select:none;touch-action:none;}
-.ui{position:absolute;top:15px;left:50%;transform:translateX(-50%);background:rgba(3,6,18,0.9);padding:12px;border-radius:20px;border:1px solid #1e293b;backdrop-filter:blur(10px);text-align:center;width:290px;box-shadow:0 12px 40px rgba(0,0,0,0.6);z-index:10;pointer-events:auto;}
+.ui{position:absolute;top:15px;left:50%;transform:translateX(-50%);background:rgba(3,6,18,0.95);padding:12px;border-radius:20px;border:1px solid #1e293b;backdrop-filter:blur(10px);text-align:center;width:290px;box-shadow:0 12px 40px rgba(0,0,0,0.6);z-index:10;pointer-events:auto;}
 .badge{font-size:10px;font-weight:bold;color:#00ffcc;letter-spacing:1px;margin-bottom:2px;}
 .money{font-size:28px;font-weight:900;color:#fbbf24;text-shadow:0 0 10px rgba(251,191,36,0.3);}
 .market{background:rgba(255,255,255,0.03);border:1px solid #1e293b;border-radius:10px;padding:6px;margin:6px 0;display:flex;justify-content:space-around;font-size:12px;font-weight:bold;}
@@ -20,23 +20,41 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
     const config={type:Phaser.AUTO,width:window.innerWidth,height:window.innerHeight,physics:{default:'arcade'},scene:{preload:preload,create:create,update:update}};
     const game=new Phaser.Game(config);
     let money=0,gas=0,clickPower=1,marketPrice=3.50,balloon,particles,planet,satellite,stars=[];
-    function preload(){
-        let circle=this.make.graphics({x:0,y:0,add:false});circle.fillStyle(0x00ffcc,1);circle.fillCircle(40,40,40);circle.generateTexture('b_img',80,80);
-        let pDot=this.make.graphics({x:0,y:0,add:false});pDot.fillStyle(0x38bdf8,1);pDot.fillCircle(4,4,4);pDot.generateTexture('g_dot',8,8);
-        
-        let pGraphic=this.make.graphics({x:0,y:0,add:false});pGraphic.fillStyle(0x2b82c9,1);pGraphic.fillCircle(60,60,60);pGraphic.fillStyle(0x4fa64f,1);pGraphic.fillRect(20,40,40,30);pGraphic.fillRect(70,60,30,40);pGraphic.generateTexture('earth_img',120,120);
-        let mGraphic=this.make.graphics({x:0,y:0,add:false});mGraphic.fillStyle(0xcc4400,1);mGraphic.fillCircle(60,60,60);mGraphic.fillStyle(0xaa7744,1);mGraphic.fillRect(30,30,30,30);mGraphic.generateTexture('mars_img',120,120);
-    }
+    function preload(){}
     function create(){
+        // Создаем звездное небо
         for(let i=0;i<70;i++){let star=this.add.circle(Phaser.Math.Between(0,window.innerWidth),Phaser.Math.Between(0,window.innerHeight),Phaser.Math.FloatBetween(0.5,2),0xffffff);this.tweens.add({targets:star,alpha:0.1,duration:Phaser.Math.Between(600,1800),yoyo:true,repeat:-1});stars.push(star);}
-        planet=this.add.image(window.innerWidth*0.25,window.innerHeight*0.35,'earth_img');satellite=this.add.circle(planet.x,planet.y,4,0xffffff);
-        particles=this.add.particles(0,0,'g_dot',{speed:{min:100,max:220},scale:{start:1.5,end:0},gravityY:120,lifespan:550,blending:'ADD',emitting:false});
-        balloon=this.add.image(window.innerWidth/2,window.innerHeight/2+45,'b_img').setInteractive({useHandCursor:true});
-        this.tweens.add({targets:balloon,scale:1.08,duration:1100,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+        
+        // Рисуем ПЛАНЕТУ стандартными кругами Phaser (100% надежность)
+        planet = this.add.circle(window.innerWidth*0.25, window.innerHeight*0.35, 55, 0x2b82c9);
+        planet.setStrokeStyle(3, 0x0088ff);
+        
+        // Спутник на орбите
+        satellite=this.add.circle(planet.x,planet.y,4,0xffffff);
+        
+        // Создаем систему неонового газа
+        particles=this.add.particles(0,0,'g_dot',{speed:{min:80,max:180},scale:{start:2,end:0},gravityY:100,lifespan:500,blending:'ADD',emitting:false});
+
+        // Рисуем КРУГЛУЮ НЕОНОВУЮ СФЕРУ КЛИКЕРА по центру экрана
+        balloon = this.add.circle(window.innerWidth/2, window.innerHeight/2 + 45, 65, 0x00ffcc);
+        balloon.setStrokeStyle(4, 0xffffff);
+        balloon.setInteractive({ useHandCursor: true });
+        
+        // Эффект мягкого дыхания сферы
+        this.tweens.add({targets:balloon,radius:72,duration:1100,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+        
+        // Механика сочных кликов
         balloon.on('pointerdown',(pointer)=>{
-            gas+=clickPower;updateUI();balloon.setScale(0.75);this.time.delayedCall(60,()=>balloon.setScale(1));particles.emitParticleAt(pointer.x,pointer.y,15);
-            let txt=this.add.text(pointer.x-12,pointer.y-20,'+'+clickPower,{font:'bold 20px sans-serif',fill:'#00ffcc'});this.tweens.add({targets:txt,y:txt.y-55,alpha:0,duration:400,onComplete:()=>txt.destroy()});
+            gas+=clickPower;updateUI();
+            balloon.setRadius(50);
+            this.time.delayedCall(60,()=>balloon.setRadius(65));
+            
+            // Вылетающие цифры добычи газа
+            let txt=this.add.text(pointer.x-12,pointer.y-25,'+'+clickPower,{font:'bold 22px sans-serif',fill:'#ffffff'});
+            this.tweens.add({targets:txt,y:txt.y-60,alpha:0,duration:400,onComplete:()=>txt.destroy()});
         });
+        
+        // Экономика живой биржи (каждые 12 секунд)
         this.time.addEvent({delay:12000,loop:true,callback:()=>{
             let old=marketPrice;marketPrice+=(Math.random()*1.8)-0.9;marketPrice=Math.min(9.50,Math.max(1.50,marketPrice));
             document.getElementById('m-rate').textContent='Rate: ' + marketPrice.toFixed(2) + ' USD';let trendEl=document.getElementById('m-trend');
@@ -44,10 +62,20 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
         }});
         document.getElementById('btn-sell').addEventListener('click',()=>{if(gas>0){money+=gas*marketPrice;gas=0;updateUI();}});updateUI();
     }
-    function update(time,delta){if(planet){planet.rotation+=0.001;satellite.x=planet.x+Math.cos(time*0.002)*100;satellite.y=planet.y+Math.sin(time*0.002)*40;}}
+    function update(time,delta){
+        if(planet){
+            satellite.x=planet.x+Math.cos(time*0.0025)*90;
+            satellite.y=planet.y+Math.sin(time*0.0025)*35;
+        }
+    }
     function updateUI(){
-        if(money>=600&&planet){planet.setTexture('mars_img');document.getElementById('biome-disp').textContent="MARS ORBIT 🪐";}
-        document.getElementById('m-disp').textContent=Math.floor(money).toLocaleString('en-US') + " USD";document.getElementById('g-disp').textContent="Storage: "+gas.toFixed(1)+" m³";
-        document.getElementById('btn-sell').disabled=gas<=0;if(gas>0)document.getElementById('btn-sell').textContent='💸 SELL GAS FOR +' + Math.floor(gas*marketPrice) + ' USD';
+        if(money>=600&&planet){
+            planet.setFillStyle(0xcc4400); // Планета плавно превращается в Марс!
+            document.getElementById('biome-disp').textContent="MARS ORBIT 🪐";
+        }
+        document.getElementById('m-disp').textContent=Math.floor(money).toLocaleString('en-US') + " USD";
+        document.getElementById('g-disp').textContent="Storage: "+gas.toFixed(1)+" m³";
+        document.getElementById('btn-sell').disabled=gas<=0;
+        if(gas>0)document.getElementById('btn-sell').textContent='💸 SELL GAS FOR +' + Math.floor(gas*marketPrice) + ' USD';
     }
 </script></body></html>
