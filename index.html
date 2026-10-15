@@ -1,5 +1,4 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"><title>Gas Tycoon: CrazyGames Edition</title>
-<!-- Официальные библиотеки движка Phaser и CrazyGames SDK загружаются в один клик -->
 <script src="https://cloudflare.com"></script>
 <script src="https://crazygames.com"></script><style>
 body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-select:none;touch-action:none;}
@@ -19,7 +18,6 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
   <div class="stats">Click: +<span id="c-pow">1</span> | Auto: +<span id="pps">0</span>/s</div>
   <button id="btn-sell" class="btn" disabled>💸 STORAGE EMPTY</button>
 </div><script {nonce}>
-    // Автоматический запуск CrazyGames SDK при старте на гитхабе
     if(window.crazygames && window.crazygames.SDK){
         window.crazygames.SDK.init().then(()=>{ console.log("SDK Active"); window.crazygames.SDK.game.gameplayStart(); }).catch(e=>console.error(e));
     }
@@ -32,7 +30,7 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
         let pDot=this.make.graphics({x:0,y:0,add:false}); pDot.fillStyle(0x38bdf8,1);pDot.fillCircle(4,4,4);pDot.generateTexture('g_dot',8,8);
     }
     function create(){
-        for(let i=0;i<70;i++){
+        for(let i=0; i<70; i++){
             let star=this.add.circle(Phaser.Math.Between(0,window.innerWidth),Phaser.Math.Between(0,window.innerHeight),Phaser.Math.FloatBetween(0.5,2),0xffffff);
             this.tweens.add({targets:star,alpha:0.1,duration:Phaser.Math.Between(600,1800),yoyo:true,repeat:-1});
         }
@@ -47,7 +45,6 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
             this.tweens.add({targets:txt,y:txt.y-55,alpha:0,duration:400,onComplete:()=>txt.destroy()});
         });
         
-        // Умная биржа: курс скачет раз в 12 секунд для максимального азарта
         this.time.addEvent({delay:12000,loop:true,callback:()=>{
             let old=marketPrice; marketPrice+=(Math.random()*1.8)-0.9; marketPrice=Math.min(9.50,Math.max(1.50,marketPrice));
             document.getElementById('m-rate').textContent=`Rate: $${marketPrice.toFixed(2)}`;
