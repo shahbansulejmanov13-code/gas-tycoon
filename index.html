@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"><title>Gas Tycoon Max</title><script src="https://crazygames.com"></script><style>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"><title>Gas Tycoon Max</title><style>
 body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-select:none;touch-action:none;-webkit-user-select:none;}
 #gameCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
 .ui{position:relative;z-index:10;pointer-events:none;padding:12px;display:flex;flex-direction:column;align-items:center;height:100vh;box-sizing:border-box;justify-content:space-between;}
@@ -18,7 +18,7 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
         <div class="money" id="m-disp">0 USD</div>
         <div style="font-size:15px;color:#38bdf8;font-weight:bold;margin:1px 0;" id="g-disp">Storage: 0.0 m³</div>
         <div style="font-size:10px;color:#475569;font-weight:bold;" id="rate-disp">Rate: 3.50 USD</div>
-        <div style="font-size:9px;color:#64748b;font-weight:bold;margin-top:2px;">CLICK: +<span id="c-pow">1</span> | AUTO: +<span id="pps">0</span> m3/s</div>
+        <div style="font-size:9px;color:#64748b;font-weight:bold;margin-top:2px;">CLICK: +<span id="c-pow">1</span> | AUTO: +<span id="pps">0</span> m³/s</div>
         <button class="btn" id="btn-sell" disabled>💸 STORAGE EMPTY</button>
     </div>
     <div class="shop">
@@ -73,7 +73,7 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
         if(currentBiomeIdx===0){planetGrad.addColorStop(0,'#3b82f6');planetGrad.addColorStop(1,'#0f172a');}
         else if(currentBiomeIdx===1){planetGrad.addColorStop(0,'#ef4444');planetGrad.addColorStop(1,'#450a0a');}
         else{planetGrad.addColorStop(0,'#701a75');planetGrad.addColorStop(1,'#1e1b4b');}
-        ctx.fillStyle = planetGrad; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); fill(); ctx.shadowBlur = 0; ctx.clip();
+        ctx.fillStyle = planetGrad; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur = 0; ctx.clip();
 
         ctx.fillStyle = currentBiomeIdx===0?'#22c55e':(currentBiomeIdx===1?'#b45309':'#6b21a8');
         for (let i = -1; i < 3; i++) {
@@ -153,13 +153,13 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
         if(e.target.tagName === 'BUTTON' || e.target.closest('.board') || e.target.closest('.shop')) return;
         let cx = canvas.width / 2; let cy = canvas.height / 2 + 35;
         if(Math.hypot(e.clientX - cx, e.clientY - cy) <= ballRadius + 25) {
-            gas += clickPower; updateUI(); saveGame(); ballRadius = targetRadius * 0.75; spawnEffects(e.clientX, e.clientY);
+            gas += clickPower; updateUI(); ballRadius = targetRadius * 0.75; spawnEffects(e.clientX, e.clientY);
         }
     });
 
     function updateUI(){
         selectBiome();
-        mDisp.textContent=Math.floor(money).toLocaleString('en-US') + " USD"; gDisp.textContent="Storage: " + gas.toFixed(1) + " m3";
+        mDisp.textContent=Math.floor(money).toLocaleString('en-US') + " USD"; gDisp.textContent="Storage: " + gas.toFixed(1) + " m³";
         cPowEl.textContent=clickPower; ppsEl.textContent=pps;
         bClick.textContent=costClick+" USD"; bAuto1.textContent=costAuto1+" USD"; bAuto2.textContent=costAuto2+" USD";
         bClick.disabled=money<costClick; bAuto1.disabled=money<costAuto1; bAuto2.disabled=money<costAuto2; btnSell.disabled=gas <= 0;
@@ -171,15 +171,9 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
         rateDisp.textContent = "Rate: " + marketPrice.toFixed(2) + " USD"; updateUI();
     }, 4000);
 
-    btnSell.addEventListener('click',()=>{if(gas>0){money+=gas*marketPrice; gas=0; updateUI(); saveGame();}});
+    btnSell.addEventListener('click',()=>{if(gas>0){money+=gas*marketPrice; gas=0; updateUI();}});
     bClick.addEventListener('click',()=>{if(money>=costClick){money-=costClick; clickPower+=1; costClick=Math.round(costClick*1.5); updateUI();}});
     bAuto1.addEventListener('click',()=>{if(money>=costAuto1){money-=costAuto1; pps+=1; costAuto1=Math.round(costAuto1*1.6); updateUI();}});
     bAuto2.addEventListener('click',()=>{if(money>=costAuto2){money-=costAuto2; pps+=15; costAuto2=Math.round(costAuto2*1.6); updateUI();}});
-    function saveGame(){localStorage.setItem('gn_money',money); localStorage.setItem('gn_gas',gas); localStorage.setItem('gn_clickPower',clickPower); localStorage.setItem('gn_pps',pps); localStorage.setItem('gn_cClick',costClick); localStorage.setItem('gn_cAuto1',costAuto1); localStorage.setItem('gn_cAuto2',costAuto2);}
-    setInterval(() => { if (pps > 0) { gas += pps / 10; updateUI(); } }, 100);
-    
-    if(window.crazygames && window.crazygames.SDK){
-        window.crazygames.SDK.init().then(()=>{ window.crazygames.SDK.game.gameplayStart(); }).catch(e=>console.error(e));
-    }
     updateUI(); draw();
 </script></body></html>
