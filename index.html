@@ -10,9 +10,9 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
 .btn:disabled{background:#131b2e;color:#475569;cursor:not-allowed;box-shadow:none;}
 </style></head><body><div class="ui">
   <div class="badge" id="biome-disp">EARTH ORBIT 🌍</div>
-  <div class="money" id="m-disp">\$0</div>
+  <div class="money" id="m-disp">0 USD</div>
   <div id="g-disp" style="color:#38bdf8;font-weight:bold;margin:4px 0;font-size:15px;">Storage: 0.0 m³</div>
-  <div class="market"><span id="m-rate">Rate: \$3.50</span><span id="m-trend" class="trend-up">📈 UP</span></div>
+  <div class="market"><span id="m-rate">Rate: 3.50 USD</span><span id="m-trend" class="trend-up">📈 UP</span></div>
   <div class="stats">Click: +<span id="c-pow">1</span> | Auto: +<span id="pps">0</span>/s</div>
   <button id="btn-sell" class="btn" disabled>💸 STORAGE EMPTY</button>
 </div><script {nonce}>
@@ -38,7 +38,7 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
         });
         this.time.addEvent({delay:12000,loop:true,callback:()=>{
             let old=marketPrice;marketPrice+=(Math.random()*1.8)-0.9;marketPrice=Math.min(9.50,Math.max(1.50,marketPrice));
-            document.getElementById('m-rate').textContent=`Rate: $${marketPrice.toFixed(2)}`;let trendEl=document.getElementById('m-trend');
+            document.getElementById('m-rate').textContent='Rate: ' + marketPrice.toFixed(2) + ' USD';let trendEl=document.getElementById('m-trend');
             if(marketPrice>=old){trendEl.textContent="📈 UP";trendEl.className="trend-up";}else{trendEl.textContent="📉 DOWN";trendEl.className="trend-down";}updateUI();
         }});
         document.getElementById('btn-sell').addEventListener('click',()=>{if(gas>0){money+=gas*marketPrice;gas=0;updateUI();}});updateUI();
@@ -46,7 +46,7 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
     function update(time,delta){if(planet){planet.rotation+=0.001;satellite.x=planet.x+Math.cos(time*0.002)*100;satellite.y=planet.y+Math.sin(time*0.002)*40;}}
     function updateUI(){
         if(money>=600&&planet){planet.setTexture('mars_img');document.getElementById('biome-disp').textContent="MARS ORBIT 🪐";}
-        document.getElementById('m-disp').textContent="\$"+Math.floor(money).toLocaleString('en-US');document.getElementById('g-disp').textContent="Storage: "+gas.toFixed(1)+" m³";
-        document.getElementById('btn-sell').disabled=gas<=0;if(gas>0)document.getElementById('btn-sell').textContent=`💸 SELL GAS FOR +$${Math.floor(gas*marketPrice)}`;
+        document.getElementById('m-disp').textContent=Math.floor(money).toLocaleString('en-US') + " USD";document.getElementById('g-disp').textContent="Storage: "+gas.toFixed(1)+" m³";
+        document.getElementById('btn-sell').disabled=gas<=0;if(gas>0)document.getElementById('btn-sell').textContent='💸 SELL GAS FOR +' + Math.floor(gas*marketPrice) + ' USD';
     }
 </script></body></html>
