@@ -23,6 +23,7 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
     function preload(){
         let circle=this.make.graphics({x:0,y:0,add:false});circle.fillStyle(0x00ffcc,1);circle.fillCircle(40,40,40);circle.generateTexture('b_img',80,80);
         let pDot=this.make.graphics({x:0,y:0,add:false});pDot.fillStyle(0x38bdf8,1);pDot.fillCircle(4,4,4);pDot.generateTexture('g_dot',8,8);
+        
         let pGraphic=this.make.graphics({x:0,y:0,add:false});pGraphic.fillStyle(0x2b82c9,1);pGraphic.fillCircle(60,60,60);pGraphic.fillStyle(0x4fa64f,1);pGraphic.fillRect(20,40,40,30);pGraphic.fillRect(70,60,30,40);pGraphic.generateTexture('earth_img',120,120);
         let mGraphic=this.make.graphics({x:0,y:0,add:false});mGraphic.fillStyle(0xcc4400,1);mGraphic.fillCircle(60,60,60);mGraphic.fillStyle(0xaa7744,1);mGraphic.fillRect(30,30,30,30);mGraphic.generateTexture('mars_img',120,120);
     }
@@ -34,7 +35,7 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
         this.tweens.add({targets:balloon,scale:1.08,duration:1100,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
         balloon.on('pointerdown',(pointer)=>{
             gas+=clickPower;updateUI();balloon.setScale(0.75);this.time.delayedCall(60,()=>balloon.setScale(1));particles.emitParticleAt(pointer.x,pointer.y,15);
-            let txt=this.add.text(pointer.x-12,pointer.y-20,`+${clickPower}`,{font:'bold 20px sans-serif',fill:'#00ffcc'});this.tweens.add({targets:txt,y:txt.y-55,alpha:0,duration:400,onComplete:()=>txt.destroy()});
+            let txt=this.add.text(pointer.x-12,pointer.y-20,'+'+clickPower,{font:'bold 20px sans-serif',fill:'#00ffcc'});this.tweens.add({targets:txt,y:txt.y-55,alpha:0,duration:400,onComplete:()=>txt.destroy()});
         });
         this.time.addEvent({delay:12000,loop:true,callback:()=>{
             let old=marketPrice;marketPrice+=(Math.random()*1.8)-0.9;marketPrice=Math.min(9.50,Math.max(1.50,marketPrice));
