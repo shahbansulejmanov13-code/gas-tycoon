@@ -16,45 +16,36 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
   <div class="stats">Click: +<span id="c-pow">1</span> | Auto: +<span id="pps">0</span>/s</div>
   <button id="btn-sell" class="btn" disabled>💸 STORAGE EMPTY</button>
 </div><script {nonce}>
-    if(window.crazygames && window.crazygames.SDK){window.crazygames.SDK.init().then(()=>{window.crazygames.SDK.game.gameplayStart();}).catch(e=>console.error(e));}
+    // Умная проверка: активируем SDK только если мы реально находимся на серверах CrazyGames
+    if(window.crazygames && window.crazygames.SDK && window.location.href.includes("crazygames")){
+        window.crazygames.SDK.init().then(()=>{ window.crazygames.SDK.game.gameplayStart(); }).catch(e=>console.error(e));
+    }
     const config={type:Phaser.AUTO,width:window.innerWidth,height:window.innerHeight,physics:{default:'arcade'},scene:{preload:preload,create:create,update:update}};
     const game=new Phaser.Game(config);
     let money=0,gas=0,clickPower=1,marketPrice=3.50,balloon,particles,planet,satellite,stars=[];
     function preload(){}
     function create(){
-        // Создаем звездное небо
         for(let i=0;i<70;i++){let star=this.add.circle(Phaser.Math.Between(0,window.innerWidth),Phaser.Math.Between(0,window.innerHeight),Phaser.Math.FloatBetween(0.5,2),0xffffff);this.tweens.add({targets:star,alpha:0.1,duration:Phaser.Math.Between(600,1800),yoyo:true,repeat:-1});stars.push(star);}
         
-        // Рисуем ПЛАНЕТУ стандартными кругами Phaser (100% надежность)
         planet = this.add.circle(window.innerWidth*0.25, window.innerHeight*0.35, 55, 0x2b82c9);
         planet.setStrokeStyle(3, 0x0088ff);
-        
-        // Спутник на орбите
         satellite=this.add.circle(planet.x,planet.y,4,0xffffff);
-        
-        // Создаем систему неонового газа
         particles=this.add.particles(0,0,'g_dot',{speed:{min:80,max:180},scale:{start:2,end:0},gravityY:100,lifespan:500,blending:'ADD',emitting:false});
 
-        // Рисуем КРУГЛУЮ НЕОНОВУЮ СФЕРУ КЛИКЕРА по центру экрана
         balloon = this.add.circle(window.innerWidth/2, window.innerHeight/2 + 45, 65, 0x00ffcc);
         balloon.setStrokeStyle(4, 0xffffff);
         balloon.setInteractive({ useHandCursor: true });
         
-        // Эффект мягкого дыхания сферы
         this.tweens.add({targets:balloon,radius:72,duration:1100,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
         
-        // Механика сочных кликов
         balloon.on('pointerdown',(pointer)=>{
             gas+=clickPower;updateUI();
             balloon.setRadius(50);
             this.time.delayedCall(60,()=>balloon.setRadius(65));
-            
-            // Вылетающие цифры добычи газа
             let txt=this.add.text(pointer.x-12,pointer.y-25,'+'+clickPower,{font:'bold 22px sans-serif',fill:'#ffffff'});
             this.tweens.add({targets:txt,y:txt.y-60,alpha:0,duration:400,onComplete:()=>txt.destroy()});
         });
         
-        // Экономика живой биржи (каждые 12 секунд)
         this.time.addEvent({delay:12000,loop:true,callback:()=>{
             let old=marketPrice;marketPrice+=(Math.random()*1.8)-0.9;marketPrice=Math.min(9.50,Math.max(1.50,marketPrice));
             document.getElementById('m-rate').textContent='Rate: ' + marketPrice.toFixed(2) + ' USD';let trendEl=document.getElementById('m-trend');
@@ -69,10 +60,7 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
         }
     }
     function updateUI(){
-        if(money>=600&&planet){
-            planet.setFillStyle(0xcc4400); // Планета плавно превращается в Марс!
-            document.getElementById('biome-disp').textContent="MARS ORBIT 🪐";
-        }
+        if(money>=600&&planet){planet.setFillStyle(0xcc4400);document.getElementById('biome-disp').textContent="MARS ORBIT 🪐";}
         document.getElementById('m-disp').textContent=Math.floor(money).toLocaleString('en-US') + " USD";
         document.getElementById('g-disp').textContent="Storage: "+gas.toFixed(1)+" m³";
         document.getElementById('btn-sell').disabled=gas<=0;
