@@ -18,7 +18,7 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
         <div class="money" id="m-disp">0 USD</div>
         <div style="font-size:15px;color:#38bdf8;font-weight:bold;margin:1px 0;" id="g-disp">Storage: 0.0 m³</div>
         <div style="font-size:10px;color:#475569;font-weight:bold;" id="rate-disp">Rate: 3.50 USD</div>
-        <div style="font-size:9px;color:#64748b;font-weight:bold;margin-top:2px;">CLICK: +<span id="c-pow">1</span> | AUTO: +<span id="pps">0</span> m³/с</div>
+        <div style="font-size:9px;color:#64748b;font-weight:bold;margin-top:2px;">CLICK: +<span id="c-pow">1</span> | AUTO: +<span id="pps">0</span> m³/s</div>
         <button class="btn" id="btn-sell" disabled>💸 STORAGE EMPTY</button>
     </div>
     <div class="shop">
@@ -29,7 +29,7 @@ body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-sel
 </div>
 <script {nonce}>
     let money=Number(localStorage.getItem('gn_money'))||0, gas=Number(localStorage.getItem('gn_gas'))||0, clickPower=Number(localStorage.getItem('gn_clickPower'))||1, pps=Number(localStorage.getItem('gn_pps'))||0;
-    let costClick=Number(localStorage.getItem('gn_cClick'))||15, costAuto1=Number(localStorage.getItem('gn_cAuto1'))||100, costAuto2=Number(localStorage.getItem('gn_cAuto2'))||850, marketPrice = 3.5;
+    let costClick=Number(localStorage.getItem('gn_cClick'))||15, costAuto1=Number(localStorage.getItem('gn_costAuto1'))||100, costAuto2=Number(localStorage.getItem('gn_costAuto2'))||850, marketPrice = 3.5;
     const mDisp=document.getElementById('m-disp'),gDisp=document.getElementById('g-disp'),cPowEl=document.getElementById('c-pow'),ppsEl=document.getElementById('pps'),btnSell=document.getElementById('btn-sell'),bClick=document.getElementById('b-click'),bAuto1=document.getElementById('b-auto1'),bAuto2=document.getElementById('b-auto2'),biomeDisp=document.getElementById('biome-disp'),rateDisp=document.getElementById('rate-disp');
     const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getContext('2d');
     function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } window.addEventListener('resize', resize); resize();
