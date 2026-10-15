@@ -1,69 +1,180 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"><title>Gas Tycoon Max</title><script src="https://cloudflare.com"></script><script src="https://crazygames.com"></script><style>
-body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-select:none;touch-action:none;}
-.ui{position:absolute;top:15px;left:50%;transform:translateX(-50%);background:rgba(3,6,18,0.95);padding:12px;border-radius:20px;border:1px solid #1e293b;backdrop-filter:blur(10px);text-align:center;width:290px;box-shadow:0 12px 40px rgba(0,0,0,0.6);z-index:10;pointer-events:auto;}
-.badge{font-size:10px;font-weight:bold;color:#00ffcc;letter-spacing:1px;margin-bottom:2px;}
-.money{font-size:28px;font-weight:900;color:#fbbf24;text-shadow:0 0 10px rgba(251,191,36,0.3);}
-.market{background:rgba(255,255,255,0.03);border:1px solid #1e293b;border-radius:10px;padding:6px;margin:6px 0;display:flex;justify-content:space-around;font-size:12px;font-weight:bold;}
-.trend-up{color:#22c55e;}.trend-down{color:#ef4444;}
-.stats{font-size:11px;color:#64748b;font-weight:bold;margin-bottom:6px;}
-.btn{width:100%;padding:11px;background:linear-gradient(135deg,#00ffcc,#007799);color:#03050d;border:none;border-radius:12px;font-size:12px;font-weight:900;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-.btn:disabled{background:#131b2e;color:#475569;cursor:not-allowed;box-shadow:none;}
-</style></head><body><div class="ui">
-  <div class="badge" id="biome-disp">EARTH ORBIT 🌍</div>
-  <div class="money" id="m-disp">0 USD</div>
-  <div id="g-disp" style="color:#38bdf8;font-weight:bold;margin:4px 0;font-size:15px;">Storage: 0.0 m³</div>
-  <div class="market"><span id="m-rate">Rate: 3.50 USD</span><span id="m-trend" class="trend-up">📈 UP</span></div>
-  <div class="stats">Click: +<span id="c-pow">1</span> | Auto: +<span id="pps">0</span>/s</div>
-  <button id="btn-sell" class="btn" disabled>💸 STORAGE EMPTY</button>
-</div><script {nonce}>
-    // Умная проверка: активируем SDK только если мы реально находимся на серверах CrazyGames
-    if(window.crazygames && window.crazygames.SDK && window.location.href.includes("crazygames")){
-        window.crazygames.SDK.init().then(()=>{ window.crazygames.SDK.game.gameplayStart(); }).catch(e=>console.error(e));
-    }
-    const config={type:Phaser.AUTO,width:window.innerWidth,height:window.innerHeight,physics:{default:'arcade'},scene:{preload:preload,create:create,update:update}};
-    const game=new Phaser.Game(config);
-    let money=0,gas=0,clickPower=1,marketPrice=3.50,balloon,particles,planet,satellite,stars=[];
-    function preload(){}
-    function create(){
-        for(let i=0;i<70;i++){let star=this.add.circle(Phaser.Math.Between(0,window.innerWidth),Phaser.Math.Between(0,window.innerHeight),Phaser.Math.FloatBetween(0.5,2),0xffffff);this.tweens.add({targets:star,alpha:0.1,duration:Phaser.Math.Between(600,1800),yoyo:true,repeat:-1});stars.push(star);}
-        
-        planet = this.add.circle(window.innerWidth*0.25, window.innerHeight*0.35, 55, 0x2b82c9);
-        planet.setStrokeStyle(3, 0x0088ff);
-        satellite=this.add.circle(planet.x,planet.y,4,0xffffff);
-        particles=this.add.particles(0,0,'g_dot',{speed:{min:80,max:180},scale:{start:2,end:0},gravityY:100,lifespan:500,blending:'ADD',emitting:false});
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"><title>Gas Tycoon Max</title><script src="https://crazygames.com"></script><style>
+body{margin:0;background:#010206;overflow:hidden;font-family:sans-serif;user-select:none;touch-action:none;-webkit-user-select:none;}
+#gameCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
+.ui{position:relative;z-index:10;pointer-events:none;padding:12px;display:flex;flex-direction:column;align-items:center;height:100vh;box-sizing:border-box;justify-content:space-between;}
+.board{background:rgba(3,6,18,0.92);padding:10px 15px;border-radius:20px;border:1px solid #1e293b;backdrop-filter:blur(12px);pointer-events:auto;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,0.7);width:95%;max-width:365px;box-sizing:border-box;margin-top:env(safe-area-inset-top,5px);}
+.money{font-size:26px;font-weight:900;color:#fbbf24;text-shadow:0 0 10px rgba(251,191,36,0.4);letter-spacing:-0.5px;}
+.btn{pointer-events:auto;width:100%;padding:11px;background:linear-gradient(135deg,var(--neon),#006699);color:#020308;border:none;border-radius:12px;font-size:12px;font-weight:900;cursor:pointer;box-shadow:0 0 20px rgba(0,255,204,0.2);margin-top:6px;-webkit-tap-highlight-color:transparent;transition:transform 0.05s;}
+.btn:active{transform:scale(0.97);}.btn:disabled{background:#131b2e;color:#475569;cursor:not-allowed;box-shadow:none;}
+.shop{pointer-events:auto;background:rgba(3,6,18,0.92);padding:6px;border-radius:20px;border:1px solid #1e293b;backdrop-filter:blur(12px);display:flex;gap:5px;width:95%;max-width:365px;box-sizing:border-box;margin-bottom:env(safe-area-inset-bottom,5px);}
+.item{background:#040814;border:1px solid #1e293b;padding:5px;border-radius:12px;text-align:center;flex:1;display:flex;flex-direction:column;justify-content:space-between;}
+.i-name{font-size:9px;font-weight:bold;color:#64748b;text-transform:uppercase;margin-bottom:2px;}
+.i-btn{background:#2563eb;color:#fff;border:none;padding:7px 2px;border-radius:6px;font-size:9px;font-weight:bold;cursor:pointer;width:100%;-webkit-tap-highlight-color:transparent;}
+.i-btn:disabled{background:#131b2e;color:#475569;cursor:not-allowed;}
+.biome-badge{font-size:10px;font-weight:bold;color:var(--neon);text-transform:uppercase;letter-spacing:1.5px;text-shadow:0 0 8px var(--neon);}
+</style></head><body><canvas id="gameCanvas"></canvas><div class="ui">
+    <div class="board">
+        <div class="biome-badge" id="biome-disp">EARTH ORBIT 🌍</div>
+        <div class="money" id="m-disp">0 USD</div>
+        <div style="font-size:15px;color:#38bdf8;font-weight:bold;margin:1px 0;" id="g-disp">Storage: 0.0 m³</div>
+        <div style="font-size:10px;color:#475569;font-weight:bold;" id="rate-disp">Rate: 3.50 USD</div>
+        <div style="font-size:9px;color:#64748b;font-weight:bold;margin-top:2px;">CLICK: +<span id="c-pow">1</span> | AUTO: +<span id="pps">0</span> m³/с</div>
+        <button class="btn" id="btn-sell" disabled>💸 STORAGE EMPTY</button>
+    </div>
+    <div class="shop">
+        <div class="item"><div class="i-name">🔧 Click</div><button class="i-btn" id="b-click">15 USD</button></div>
+        <div class="item"><div class="i-name">🚜 Rig</div><button class="i-btn" id="b-auto1">100 USD</button></div>
+        <div class="item"><div class="i-name">🏢 Plant</div><button class="i-btn" id="b-auto2">850 USD</button></div>
+    </div>
+</div>
+<script {nonce}>
+    let money=Number(localStorage.getItem('gn_money'))||0, gas=Number(localStorage.getItem('gn_gas'))||0, clickPower=Number(localStorage.getItem('gn_clickPower'))||1, pps=Number(localStorage.getItem('gn_pps'))||0;
+    let costClick=Number(localStorage.getItem('gn_cClick'))||15, costAuto1=Number(localStorage.getItem('gn_cAuto1'))||100, costAuto2=Number(localStorage.getItem('gn_cAuto2'))||850, marketPrice = 3.5;
+    const mDisp=document.getElementById('m-disp'),gDisp=document.getElementById('g-disp'),cPowEl=document.getElementById('c-pow'),ppsEl=document.getElementById('pps'),btnSell=document.getElementById('btn-sell'),bClick=document.getElementById('b-click'),bAuto1=document.getElementById('b-auto1'),bAuto2=document.getElementById('b-auto2'),biomeDisp=document.getElementById('biome-disp'),rateDisp=document.getElementById('rate-disp');
+    const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getContext('2d');
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } window.addEventListener('resize', resize); resize();
+    
+    let ballRadius = 65; let targetRadius = 65; let glowTime = 0; let shake = 0; let planetFlash = 0;
+    const particles = [], stars = [], texts = [], shockwaves = [];
+    let earthAngle = 0; let satelliteAngle = 0; let meteor = { x: -200, y: 0, vx: 0, vy: 0, active: false };
 
-        balloon = this.add.circle(window.innerWidth/2, window.innerHeight/2 + 45, 65, 0x00ffcc);
-        balloon.setStrokeStyle(4, 0xffffff);
-        balloon.setInteractive({ useHandCursor: true });
-        
-        this.tweens.add({targets:balloon,radius:72,duration:1100,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
-        
-        balloon.on('pointerdown',(pointer)=>{
-            gas+=clickPower;updateUI();
-            balloon.setRadius(50);
-            this.time.delayedCall(60,()=>balloon.setRadius(65));
-            let txt=this.add.text(pointer.x-12,pointer.y-25,'+'+clickPower,{font:'bold 22px sans-serif',fill:'#ffffff'});
-            this.tweens.add({targets:txt,y:txt.y-60,alpha:0,duration:400,onComplete:()=>txt.destroy()});
-        });
-        
-        this.time.addEvent({delay:12000,loop:true,callback:()=>{
-            let old=marketPrice;marketPrice+=(Math.random()*1.8)-0.9;marketPrice=Math.min(9.50,Math.max(1.50,marketPrice));
-            document.getElementById('m-rate').textContent='Rate: ' + marketPrice.toFixed(2) + ' USD';let trendEl=document.getElementById('m-trend');
-            if(marketPrice>=old){trendEl.textContent="📈 UP";trendEl.className="trend-up";}else{trendEl.textContent="📉 DOWN";trendEl.className="trend-down";}updateUI();
-        }});
-        document.getElementById('btn-sell').addEventListener('click',()=>{if(gas>0){money+=gas*marketPrice;gas=0;updateUI();}});updateUI();
+    for(let i=0; i<120; i++) { stars.push({ x: Math.random()*2000, y: Math.random()*2000, size: Math.random()*1.4+0.3, alpha: Math.random(), speed: Math.random()*0.15+0.05 }); }
+
+    const biomes = [
+        { name: "EARTH ORBIT 🌍", neon: "#00ffcc", secondary: "#005544", pColor: "#0088ff", clouds: true },
+        { name: "MARS ORBIT 🪐", neon: "#ff5500", secondary: "#661100", pColor: "#ff4400", clouds: false },
+        { name: "DEEP SPACE ✨", neon: "#d946ef", secondary: "#581c87", pColor: "#a855f7", clouds: true }
+    ];
+    let currentBiomeIdx = 0;
+
+    function selectBiome() {
+        if (money < 600) currentBiomeIdx = 0; else if (money < 3000) currentBiomeIdx = 1; else currentBiomeIdx = 2;
+        let b = biomes[currentBiomeIdx]; document.documentElement.style.setProperty('--neon', b.neon); biomeDisp.textContent = b.name;
     }
-    function update(time,delta){
-        if(planet){
-            satellite.x=planet.x+Math.cos(time*0.0025)*90;
-            satellite.y=planet.y+Math.sin(time*0.0025)*35;
+
+    function spawnEffects(cX, cY) {
+        let b = biomes[currentBiomeIdx]; shake = 8; planetFlash = 1.0;
+        for(let i=0; i<16; i++) {
+            let angle = Math.random() * Math.PI * 2; let speed = Math.random() * 4 + 2;
+            particles.push({ x: cX, y: cY, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed - 1, size: Math.random()*3+1.5, alpha: 1, color: Math.random()>0.3?b.neon:'#ffffff' });
         }
+        texts.push({ x: cX + (Math.random()-0.5)*15, y: cY - 20, text: "+" + clickPower, alpha: 1, vy: -2, color: '#ffffff' });
+        shockwaves.push({ x: cX, y: cY, r: 10, maxR: 90, alpha: 1, color: b.neon });
     }
+
+    function drawPlanet(x, y, r) {
+        earthAngle += 0.0008; satelliteAngle += 0.007; let b = biomes[currentBiomeIdx];
+        ctx.save(); ctx.translate(x, y); ctx.scale(2.2, 0.42); ctx.strokeStyle = b.neon;
+        ctx.globalAlpha = 0.04; ctx.lineWidth = r * 0.4; ctx.beginPath(); ctx.arc(0, 0, r*1.1, 0, Math.PI*2); ctx.stroke();
+        ctx.globalAlpha = 0.15; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, r*1.1, 0, Math.PI*2); ctx.stroke(); ctx.restore();
+
+        ctx.save(); ctx.shadowBlur = 35; ctx.shadowColor = b.pColor;
+        let planetGrad = ctx.createRadialGradient(x - r/3, y - r/3, r*0.05, x, y, r);
+        if(currentBiomeIdx===0){planetGrad.addColorStop(0,'#3b82f6');planetGrad.addColorStop(1,'#0f172a');}
+        else if(currentBiomeIdx===1){planetGrad.addColorStop(0,'#ef4444');planetGrad.addColorStop(1,'#450a0a');}
+        else{planetGrad.addColorStop(0,'#701a75');planetGrad.addColorStop(1,'#1e1b4b');}
+        ctx.fillStyle = planetGrad; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur = 0; ctx.clip();
+
+        ctx.fillStyle = currentBiomeIdx===0?'#22c55e':(currentBiomeIdx===1?'#b45309':'#6b21a8');
+        for (let i = -1; i < 3; i++) {
+            let ox = x + (i * r * 1.6) + (earthAngle * r * 2.2) % (r * 3.2);
+            ctx.beginPath(); ctx.arc(ox, y - r/5, r/2.8, 0, Math.PI*2); ctx.arc(ox + r/2, y + r/4, r/2, 0, Math.PI*2); ctx.fill();
+        }
+
+        if(b.clouds) {
+            ctx.fillStyle = 'rgba(255,255,255,0.22)';
+            for (let i = -1; i < 3; i++) {
+                let cx = x + (i * r * 1.8) + (earthAngle * r * 3.5) % (r * 3.6);
+                ctx.beginPath(); ctx.fillRect(cx, y - r/2, r*0.8, r*0.12); ctx.fillRect(cx - r/3, y + r/5, r*0.6, r*0.08); ctx.fill();
+            }
+        }
+        let shadowGrad = ctx.createLinearGradient(x-r, y-r, x+r, y+r); shadowGrad.addColorStop(0,`rgba(255,255,255,${0.05 + planetFlash*0.2})`); shadowGrad.addColorStop(0.6,'rgba(0,0,0,0.5)'); shadowGrad.addColorStop(1,'rgba(0,0,0,0.98)');
+        ctx.fillStyle = shadowGrad; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); ctx.restore();
+
+        let satX = x + Math.cos(satelliteAngle)*(r*1.45); let satY = y + Math.sin(satelliteAngle)*(r*0.5);
+        ctx.save(); ctx.fillStyle = "#94a3b8"; ctx.beginPath(); ctx.arc(satX, satY, 3.5, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#0ea5e9"; ctx.fillRect(satX - 8, satY - 1, 4, 2); ctx.fillRect(satX + 4, satY - 1, 4, 2); ctx.restore();
+    }
+    function draw() {
+        let b = biomes[currentBiomeIdx]; glowTime += 0.035; planetFlash *= 0.92;
+        ctx.save(); if(shake > 0) { ctx.translate((Math.random()-0.5)*shake, (Math.random()-0.5)*shake); shake *= 0.85; }
+        ctx.fillStyle = '#01030a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = "#ffffff";
+        for(let i=0; i<stars.length; i++) {
+            let s = stars[i]; s.y += s.speed; ctx.globalAlpha = s.alpha * (0.5 + Math.sin(glowTime + i)*0.5);
+            ctx.fillRect(s.x % canvas.width, s.y % canvas.height, s.size, s.size);
+        }
+        ctx.globalAlpha = 1;
+
+        if(!meteor.active && Math.random() < 0.004) {
+            meteor.x = Math.random()*canvas.width; meteor.y = -40; meteor.vx = (Math.random()-0.3)*8+4; meteor.vy = Math.random()*5+5; meteor.active = true;
+        }
+        if(meteor.active) {
+            meteor.x += meteor.vx; meteor.y += meteor.vy;
+            let mGrad = ctx.createLinearGradient(meteor.x, meteor.y, meteor.x-meteor.vx*3, meteor.y-meteor.vy*3); mGrad.addColorStop(0,'#fff'); mGrad.addColorStop(1,'transparent');
+            ctx.strokeStyle = mGrad; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(meteor.x, meteor.y); ctx.lineTo(meteor.x-meteor.vx*3, meteor.y-meteor.vy*3); ctx.stroke();
+            if(meteor.y > canvas.height + 40) meteor.active = false;
+        }
+
+        let planetSize = Math.min(canvas.width, canvas.height) * 0.15; drawPlanet(canvas.width * 0.5, canvas.height * 0.35, planetSize);
+
+        for(let i = shockwaves.length - 1; i >= 0; i--) {
+            let sw = shockwaves[i]; sw.r += 4; sw.alpha -= 0.025;
+            if(sw.alpha <= 0 || sw.r >= sw.maxR) { shockwaves.splice(i,1); continue; }
+            ctx.save(); ctx.globalAlpha = sw.alpha; ctx.strokeStyle = sw.color; ctx.lineWidth = 3; ctx.shadowBlur = 15; ctx.shadowColor = sw.color;
+            ctx.beginPath(); ctx.arc(sw.x, sw.y, sw.r, 0, Math.PI*2); ctx.stroke(); ctx.restore();
+        }
+
+        for(let i = particles.length - 1; i >= 0; i--) {
+            let p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.07; p.alpha -= 0.02;
+            if(p.alpha <= 0) { particles.splice(i, 1); continue; }
+            ctx.save(); ctx.globalAlpha = p.alpha; ctx.shadowBlur = 6; ctx.shadowColor = p.color; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); ctx.restore();
+        }
+
+        for(let i = texts.length - 1; i >= 0; i--) {
+            let t = texts[i]; t.y += t.vy; t.alpha -= 0.03; if(t.alpha <= 0) { texts.splice(i, 1); continue; }
+            ctx.save(); ctx.globalAlpha = t.alpha; ctx.font = "bold 20px sans-serif"; ctx.fillStyle = t.color; ctx.shadowBlur = 6; ctx.shadowColor = b.neon; ctx.fillText(t.text, t.x - 10, t.y); ctx.restore();
+        }
+
+        let idealRadius = Math.min(canvas.width, canvas.height) * 0.16; targetRadius = idealRadius < 55 ? 55 : (idealRadius > 70 ? 70 : idealRadius);
+        ballRadius += (targetRadius - ballRadius) * 0.15;
+        let cx = canvas.width / 2; let cy = canvas.height / 2 + 35; let pulseRadius = ballRadius + Math.sin(glowTime) * 4;
+        
+        ctx.save(); ctx.shadowBlur = 25 + Math.sin(glowTime)*12; ctx.shadowColor = b.neon;
+        let grad = ctx.createRadialGradient(cx, cy, 5, cx, cy, pulseRadius); grad.addColorStop(0, b.neon); grad.addColorStop(1, b.secondary);
+        ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(cx, cy, ballRadius, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 3.5; ctx.stroke(); ctx.restore();
+        
+        ctx.restore(); requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('pointerdown', (e) => {
+        if(e.target.tagName === 'BUTTON' || e.target.closest('.board') || e.target.closest('.shop')) return;
+        let cx = canvas.width / 2; let cy = canvas.height / 2 + 35;
+        if(Math.hypot(e.clientX - cx, e.clientY - cy) <= ballRadius + 25) {
+            gas += clickPower; updateUI(); saveGame(); ballRadius = targetRadius * 0.75; spawnEffects(e.clientX, e.clientY);
+        }
+    });
+
     function updateUI(){
-        if(money>=600&&planet){planet.setFillStyle(0xcc4400);document.getElementById('biome-disp').textContent="MARS ORBIT 🪐";}
-        document.getElementById('m-disp').textContent=Math.floor(money).toLocaleString('en-US') + " USD";
-        document.getElementById('g-disp').textContent="Storage: "+gas.toFixed(1)+" m³";
-        document.getElementById('btn-sell').disabled=gas<=0;
-        if(gas>0)document.getElementById('btn-sell').textContent='💸 SELL GAS FOR +' + Math.floor(gas*marketPrice) + ' USD';
+        selectBiome();
+        mDisp.textContent=Math.floor(money).toLocaleString('en-US') + " USD"; gDisp.textContent="Storage: " + gas.toFixed(1) + " m³";
+        cPowEl.textContent=clickPower; ppsEl.textContent=pps;
+        bClick.textContent=costClick+" USD"; bAuto1.textContent=costAuto1+" USD"; bAuto2.textContent=costAuto2+" USD";
+        bClick.disabled=money<costClick; bAuto1.disabled=money<costAuto1; bAuto2.disabled=money<costAuto2; btnSell.disabled=gas <= 0;
+        if(gas > 0) { btnSell.textContent = "SELL GAS FOR +" + Math.floor(gas * marketPrice) + " USD"; } else { btnSell.textContent = "STORAGE EMPTY"; }
     }
+
+    setInterval(() => {
+        marketPrice += (Math.random() - 0.5) * 0.6; marketPrice = Math.min(9.50, Math.max(1.50, marketPrice));
+        rateDisp.textContent = "Rate: " + marketPrice.toFixed(2) + " USD"; updateUI();
+    }, 4000);
+
+    btnSell.addEventListener('click',()=>{if(gas>0){money+=gas*marketPrice; gas=0; updateUI(); saveGame();}});
+    bClick.addEventListener('click',()=>{if(money>=costClick){money-=costClick; clickPower+=1; costClick=Math.round(costClick*1.5); updateUI(); saveGame();}});
+    bAuto1.addEventListener('click',()=>{if(money>=costAuto1){money-=costAuto1; pps+=1; costAuto1=Math.round(costAuto1*1.6); updateUI(); saveGame();}});
+    bAuto2.addEventListener('click',()=>{if(money>=costAuto2){money-=costAuto2; pps+=15; costAuto2=Math.round(costAuto2*1.6); updateUI(); saveGame();}});
+    function saveGame(){localStorage.setItem('gn_money',money); localStorage.setItem('gn_gas',gas); localStorage.setItem('gn_clickPower',clickPower); localStorage.setItem('gn_pps',pps); localStorage.setItem('gn_cClick',costClick); localStorage.setItem('gn_cAuto1',costAuto1); localStorage.setItem('gn_cAuto2',costAuto2);}
+    setInterval(() => { if (pps > 0) { gas += pps / 10; updateUI(); } }, 100); updateUI(); draw();
 </script></body></html>
